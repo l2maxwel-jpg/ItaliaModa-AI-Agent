@@ -1,0 +1,10 @@
+{
+  "name": "PrestaShop AI Product Agent",
+  "description": "An agent that auto-extracts product metadata (SKU, price, title, description) from photos and publishes them directly to PrestaShop 8.2",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
