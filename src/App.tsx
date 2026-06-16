@@ -1266,41 +1266,41 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 font-sans text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#f6f6f7] font-sans text-[#202223] flex flex-col antialiased">
       {/* HEADER SECTION */}
-      <header className="border-b border-slate-800 bg-slate-950 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+      <header className="border-b border-[#e1e3e5] bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-tr from-cyan-500 to-indigo-600 p-2.5 rounded-xl shadow-md flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white animate-pulse" />
+          <div className="bg-[#e1f0ea] p-2.5 rounded-lg shadow-sm flex items-center justify-center border border-[#c3e6dc]">
+            <Sparkles className="w-5 h-5 text-[#008060] animate-pulse" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-base font-semibold tracking-tight text-[#202223] flex items-center gap-2">
               PrestaShop 8.2 AI Agent 
-              <span className="text-xs bg-cyan-500/10 text-cyan-400 font-mono px-2 py-0.5 rounded-full border border-cyan-500/20">v8.2 Opt</span>
+              <span className="text-[11px] bg-[#e1f0ea] text-[#006e52] font-mono px-2 py-0.5 rounded border border-[#b4dfd2]">v8.2 Opt</span>
             </h1>
-            <p className="text-xs text-slate-400">Автоматический импорт и генерация товаров по фотографии</p>
+            <p className="text-xs text-[#5c5f62]">Автоматический импорт и генерация товаров по фотографии</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
           {/* Language Switcher */}
-          <div className="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center space-x-1">
+          <div className="bg-[#f1f2f4] border border-[#e1e3e5] p-1 rounded-lg flex items-center space-x-1">
             <button
               onClick={() => setDataLanguage("pl")}
-              className={`text-xs px-2.5 py-1.5 rounded-lg transition-all ${
+              className={`text-xs px-2.5 py-1 rounded transition-all ${
                 dataLanguage === "pl" 
-                  ? "bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20" 
-                  : "text-slate-400 hover:text-white border border-transparent"
+                  ? "bg-white text-[#202223] font-semibold border border-[#babfc3] shadow-sm" 
+                  : "text-[#5c5f62] hover:text-[#202223] border border-transparent"
               }`}
             >
               Polski 🇵🇱
             </button>
             <button
               onClick={() => setDataLanguage("ru")}
-              className={`text-xs px-2.5 py-1.5 rounded-lg transition-all ${
+              className={`text-xs px-2.5 py-1 rounded transition-all ${
                 dataLanguage === "ru" 
-                  ? "bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20" 
-                  : "text-slate-400 hover:text-white border border-transparent"
+                  ? "bg-white text-[#202223] font-semibold border border-[#babfc3] shadow-sm" 
+                  : "text-[#5c5f62] hover:text-[#202223] border border-transparent"
               }`}
             >
               Русский 🇷🇺
@@ -1310,14 +1310,14 @@ export default function App() {
           {/* Quick Connection Indicator */}
           <button 
             onClick={() => setShowSettings(!showSettings)}
-            className={`flex items-center space-x-2 text-xs px-3.5 py-2 rounded-xl transition-all border ${
+            className={`flex items-center space-x-2 text-xs px-3.5 py-2 rounded-lg transition-all border ${
               psConfig.apiKey 
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20" 
-                : "bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20"
+                ? "bg-[#e1f0ea] text-[#006e52] border-[#b4dfd2] hover:bg-[#d0e9e0]" 
+                : "bg-[#fff4e5] text-[#8a5b00] border-[#ffe0b2] hover:bg-[#ffe0b2]/45"
             }`}
           >
-            <div className={`w-2 h-2 rounded-full ${psConfig.apiKey ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
-            <span>{psConfig.apiKey ? "Настроен" : "Требуется настройка"}</span>
+            <div className={`w-2 h-2 rounded-full ${psConfig.apiKey ? "bg-[#008060] animate-ping" : "bg-amber-500"}`} />
+            <span className="font-medium">{psConfig.apiKey ? "Настроен" : "Требуется настройка"}</span>
             <Settings className="w-3.5 h-3.5 ml-1 transition-transform hover:rotate-45" />
           </button>
         </div>
@@ -1330,17 +1330,17 @@ export default function App() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-slate-950 border-b border-slate-800 p-6 overflow-hidden"
+            className="bg-white border-b border-[#e1e3e5] p-6 overflow-hidden shadow-sm"
           >
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <Sliders className="w-5 h-5 text-cyan-400" />
-                  <h3 className="font-semibold text-white">Параметры интеграции PrestaShop Webservice</h3>
+                  <Sliders className="w-5 h-5 text-[#008060]" />
+                  <h3 className="font-semibold text-[#202223]">Параметры интеграции PrestaShop Webservice</h3>
                 </div>
                 <button 
                   onClick={() => setShowSettings(false)}
-                  className="text-xs text-slate-400 hover:text-white underline"
+                  className="text-xs text-[#5c5f62] hover:text-[#202223] underline"
                 >
                   Закрыть настройки
                 </button>
@@ -1348,24 +1348,24 @@ export default function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223] mb-1.5">
                     Адрес сайта PrestaShop 8.2 (URL)
                   </label>
                   <div className="relative">
-                    <Globe className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-500" />
+                    <Globe className="absolute left-3 top-2.5 w-4.5 h-4.5 text-[#8c9196]" />
                     <input 
                       type="text" 
                       placeholder="https://prestashop.my-shop.com"
                       value={psConfig.shopUrl}
                       onChange={(e) => setPsConfig(prev => ({ ...prev, shopUrl: e.target.value }))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg py-2 pl-10 pr-4 text-sm text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-all"
                     />
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1">Основной URL вашего магазина.</p>
+                  <p className="text-[10px] text-[#6d7175] mt-1">Основной URL вашего магазина.</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223] mb-1.5">
                     Ключ Веб-службы (API Webservice Key)
                   </label>
                   <input 
@@ -1373,13 +1373,13 @@ export default function App() {
                     placeholder="Например: ABCDEFGHIJKLM12345678"
                     value={psConfig.apiKey}
                     onChange={(e) => setPsConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-4 text-sm font-mono text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-[#babfc3] rounded-lg py-2 px-4 text-sm font-mono text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-all"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Должен иметь права на запись для products, images, categories.</p>
+                  <p className="text-[10px] text-[#6d7175] mt-1">Должен иметь права на запись для products, images, categories.</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223] mb-1.5">
                     ID Языка в базе данных (Language ID)
                   </label>
                   <input 
@@ -1387,22 +1387,22 @@ export default function App() {
                     min="1"
                     value={psConfig.languageId}
                     onChange={(e) => setPsConfig(prev => ({ ...prev, languageId: parseInt(e.target.value, 10) || 1 }))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-white border border-[#babfc3] rounded-lg py-2 px-4 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-all"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">ID по умолчанию в PrestaShop: 1 (русский или ваш язык).</p>
+                  <p className="text-[10px] text-[#6d7175] mt-1">ID по умолчанию в PrestaShop: 1 (русский или ваш язык).</p>
                 </div>
               </div>
 
               {/* Settings Action Buttons */}
-              <div className="mt-5 pt-4 border-t border-slate-800/60 flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-xs text-slate-400">
-                  <Info className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div className="mt-5 pt-4 border-t border-[#e1e3e5]/65 flex items-center justify-between">
+                <div className="flex items-center space-x-2 text-xs text-[#5c5f62]">
+                  <Info className="w-4 h-4 text-[#008060] shrink-0" />
                   <span>Веб-служба должна быть включена в меню: Настройки ➔ Расширенные параметры ➔ Веб-служба</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={fetchCategories}
-                    className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 px-3.5 rounded-lg transition-colors flex items-center space-x-1"
+                    className="text-xs bg-white border border-[#babfc3] hover:bg-[#f1f2f4] text-[#202223] py-2 px-3.5 rounded-lg transition-colors flex items-center space-x-1 font-medium shadow-sm"
                     disabled={isTestingConfig}
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -1411,7 +1411,7 @@ export default function App() {
 
                   <button
                     onClick={handleTestConnection}
-                    className="text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-5 rounded-lg transition-colors flex items-center space-x-1.5 shadow-md"
+                    className="text-xs bg-[#008060] hover:bg-[#006e52] text-white font-medium py-2 px-5 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm active:bg-[#005e46]"
                     disabled={isTestingConfig}
                   >
                     {isTestingConfig ? (
@@ -1426,10 +1426,10 @@ export default function App() {
 
               {/* Testing Status Feedback message */}
               {configTestResult && (
-                <div className={`mt-4 p-3 rounded-xl border text-xs flex items-start space-x-2 ${
+                <div className={`mt-4 p-3 rounded-lg border text-xs flex items-start space-x-2 ${
                   configTestResult.success 
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                    : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    ? "bg-[#e1f0ea] text-[#006e52] border-[#b4dfd2]" 
+                    : "bg-[#fbeae5] text-[#8a2512] border-[#f5c2b8]"
                 }`}>
                   {configTestResult.success ? (
                     <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -1448,10 +1448,10 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* LEFT COLUMN: SOURCE (IMAGE AREA) - occupies 5 cols */}
-        <section className="lg:col-span-5 flex flex-col space-y-5">
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg flex-1 flex flex-col">
-            <h2 className="text-sm font-semibold tracking-wide text-cyan-400 uppercase mb-3 flex items-center space-x-1.5">
-              <Camera className="w-4 h-4" />
+        <section className="lg:col-span-12 xl:col-span-5 flex flex-col space-y-5">
+          <div className="bg-white border border-[#e1e3e5] rounded-xl p-5 shadow-sm flex-1 flex flex-col">
+            <h2 className="text-xs font-bold tracking-wider text-[#008060] uppercase mb-3.5 flex items-center space-x-1.5 border-b border-[#f1f2f4] pb-2.5">
+              <Camera className="w-4 h-4 text-[#008060]" />
               <span>Источники фотографий</span>
             </h2>
 
@@ -1459,15 +1459,15 @@ export default function App() {
             <div className="flex-1 flex flex-col">
               {isCameraActive ? (
                 /* LIVE VIDEO STREAM AREA */
-                <div className="relative rounded-xl overflow-hidden bg-black aspect-square flex flex-col justify-between border border-slate-700">
+                <div className="relative rounded-lg overflow-hidden bg-black aspect-square flex flex-col justify-between border border-[#babfc3]">
                   <video 
                     ref={videoRef} 
                     autoPlay 
                     playsInline 
                     className="w-full h-full object-cover scale-x-[-1]"
                   />
-                  <div className="absolute top-3 right-3 bg-slate-900/80 px-2 py-1 rounded-lg text-[10px] text-red-400 flex items-center space-x-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+                  <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-md text-[10px] font-semibold text-red-650 flex items-center space-x-1 border border-red-200 shadow-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
                     <span>Камера включена</span>
                   </div>
 
@@ -1480,7 +1480,7 @@ export default function App() {
                           setSelectedCameraId(e.target.value);
                           startCamera(e.target.value);
                         }}
-                        className="bg-slate-900/90 text-xs text-white border border-slate-700 py-1 px-3 rounded-lg max-w-xs focus:outline-none"
+                        className="bg-white text-xs text-[#202223] border border-[#babfc3] py-1 px-3 rounded-lg max-w-xs focus:outline-none focus:border-[#008060]"
                       >
                         {cameraDevices.map((dev, idx) => (
                           <option key={dev.deviceId} value={dev.deviceId}>
@@ -1493,13 +1493,13 @@ export default function App() {
                     <div className="flex space-x-3 w-full justify-center">
                       <button
                         onClick={stopCamera}
-                        className="bg-slate-800/90 hover:bg-slate-700 text-xs text-slate-300 font-medium py-2 px-4 rounded-xl transition-colors"
+                        className="bg-white hover:bg-[#f6f6f7] border border-[#babfc3] text-xs text-[#202223] font-medium py-2 px-4 rounded-lg transition-colors shadow-sm"
                       >
                         Отмена
                       </button>
                       <button
                         onClick={capturePhoto}
-                        className="bg-cyan-500 hover:bg-cyan-400 text-xs text-slate-950 font-bold py-2 px-6 rounded-xl transition-colors flex items-center space-x-1.5 shadow"
+                        className="bg-[#008060] hover:bg-[#006e52] text-xs text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm active:bg-[#005e46]"
                       >
                         <Camera className="w-4 h-4" />
                         <span>Сделать снимок</span>
@@ -1514,12 +1514,12 @@ export default function App() {
                   onDragOver={handleDrag}
                   onDragLeave={handleDrag}
                   onDrop={handleDrop}
-                  className={`flex-1 rounded-xl flex flex-col justify-center items-center transition-all aspect-square border-2 ${
+                  className={`flex-1 rounded-lg flex flex-col justify-center items-center transition-all aspect-square border-2 ${
                     selectedImage 
-                      ? "bg-slate-900 border-slate-700" 
+                      ? "bg-white border-[#e1e3e5]" 
                       : dragActive 
-                      ? "bg-cyan-500/5 border-cyan-400/80 border-dashed" 
-                      : "bg-slate-900/60 hover:bg-slate-900 border-slate-800/80 border-dashed"
+                      ? "bg-[#f1f8f5] border-[#008060] border-dashed" 
+                      : "bg-[#fafbfb] hover:bg-white border-[#babfc3] hover:border-[#008060] border-dashed"
                   } relative overflow-hidden`}
                 >
                   <input 
@@ -1533,7 +1533,7 @@ export default function App() {
 
                   {selectedImage ? (
                     /* RENDER SOURCE IMAGE */
-                    <div className="w-full h-full relative group">
+                    <div className="w-full h-full relative group bg-[#fafbfa]">
                       <img 
                         src={selectedImage} 
                         alt="Product source preview" 
@@ -1553,7 +1553,7 @@ export default function App() {
                               setSelectedImage(null);
                             }
                           }}
-                          className="bg-slate-950/80 hover:bg-red-600 p-2 rounded-xl text-slate-200 hover:text-white transition-all shadow"
+                          className="bg-white border border-[#e1e3e5] text-[#202223] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 p-2 rounded-lg transition-all shadow-sm"
                           title="Удалить фото"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1563,25 +1563,25 @@ export default function App() {
                   ) : (
                     /* EMPTY PLACEHOLDER - NO PHOTO EXTRACTED */
                     <div className="p-6 text-center flex flex-col items-center space-y-4 max-w-sm">
-                      <div className="bg-slate-800/80 p-4 rounded-full text-slate-400">
+                      <div className="bg-[#f1f8f5] border border-[#c3e6dc] p-4 rounded-full text-[#008060]">
                         <Upload className="w-8 h-8" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">Перетащите сюда фото товара</p>
-                        <p className="text-xs text-slate-400 mt-1">или выберите один из вариантов ниже для мгновенной загрузки (поддерживается мульти-загрузка)</p>
+                        <p className="text-sm font-semibold text-[#202223]">Перетащите сюда фото товара</p>
+                        <p className="text-xs text-[#5c5f62] mt-1.5 leading-relaxed">или выберите один из вариантов ниже для мгновенной загрузки (поддерживается мульти-загрузка)</p>
                       </div>
 
-                      <div className="flex space-x-2 pt-2">
+                      <div className="flex space-x-2.5 pt-2">
                         <button 
                           onClick={handleFileSelectBtn}
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-lg transition-colors flex items-center space-x-1.5"
+                          className="bg-white hover:bg-[#f6f6f7] border border-[#babfc3] text-[#202223] text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
                         >
-                          <Upload className="w-3.5 h-3.5" />
+                          <Upload className="w-3.5 h-3.5 inline mr-1" />
                           <span>Обзор файлов</span>
                         </button>
                         <button 
                           onClick={() => startCamera()}
-                          className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3.5 py-2 rounded-lg transition-colors flex items-center space-x-1.5 shadow"
+                          className="bg-[#008060] hover:bg-[#006e52] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm active:bg-[#005e46]"
                         >
                           <Camera className="w-3.5 h-3.5" />
                           <span>Веб-камера</span>
@@ -1594,26 +1594,26 @@ export default function App() {
 
               {/* MUTLI-IMAGE THUMBNAIL GALLERY */}
               {uploadedImages.length > 0 && (
-                <div className="mt-4 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  <p className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide flex items-center justify-between">
+                <div className="mt-4 p-3.5 bg-[#fafbfa] border border-[#e1e3e5] rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
+                  <p className="text-[11px] font-bold text-[#5c5f62] mb-2 px-0.5 uppercase tracking-wider flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <span>Галерея товара ({uploadedImages.length})</span>
                       {showClearConfirm ? (
                         <span className="flex items-center gap-1 font-sans ml-2 lowercase normal-case">
-                          <span className="text-[10px] text-rose-400">Удалить все?</span>
+                          <span className="text-[10px] text-rose-600 font-semibold">Удалить все?</span>
                           <button
                             onClick={() => {
                               setUploadedImages([]);
                               setSelectedImage(null);
                               setShowClearConfirm(false);
                             }}
-                            className="bg-rose-600 hover:bg-rose-700 text-white font-sans font-semibold text-[9px] px-1.5 py-0.5 rounded cursor-pointer transition-all"
+                            className="bg-rose-600 hover:bg-rose-700 text-white font-sans font-semibold text-[9px] px-2 py-0.5 rounded cursor-pointer transition-all"
                           >
                             Да
                           </button>
                           <button
                             onClick={() => setShowClearConfirm(false)}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-sans font-medium text-[9px] px-1.5 py-0.5 rounded cursor-pointer transition-all"
+                            className="bg-white border border-[#babfc3] text-[#202223] hover:bg-[#f6f6f7] font-sans font-medium text-[9px] px-2 py-0.5 rounded cursor-pointer transition-all"
                           >
                             Нет
                           </button>
@@ -1621,13 +1621,13 @@ export default function App() {
                       ) : (
                         <button
                           onClick={() => setShowClearConfirm(true)}
-                          className="ml-2 text-rose-550 hover:text-rose-400 font-sans font-medium text-[9px] lowercase bg-rose-950/40 hover:bg-rose-950/60 px-1.5 py-0.5 rounded transition-all border border-rose-900/30 cursor-pointer"
+                          className="ml-2 text-rose-600 hover:text-rose-700 font-sans font-bold text-[9px] uppercase bg-rose-50 hover:bg-rose-100 px-1.5 py-0.5 rounded transition-all border border-rose-200 cursor-pointer"
                         >
                           очистить всё
                         </button>
                       )}
                     </span>
-                    <span className="text-[10px] text-slate-500 lowercase">кликните для выбора главного фото, перетащите для изменения порядка</span>
+                    <span className="text-[10px] text-[#8c9196] font-normal lowercase">кликните для выбора главного фото, перетащите для изменения порядка</span>
                   </p>
                   <div className="grid grid-cols-5 gap-2">
                     {sortedImages.map((img, idx) => {
@@ -1645,12 +1645,12 @@ export default function App() {
                             setSelectedImage(img.base64);
                             setImageMime(img.mimeType);
                           }}
-                          className={`aspect-square rounded-lg relative overflow-hidden group cursor-grab active:cursor-grabbing border transition-all ${
-                            isDragged ? "opacity-40 scale-95 border-dashed border-cyan-500" : ""
+                          className={`aspect-square rounded-lg relative overflow-hidden group cursor-grab active:cursor-grabbing border bg-white transition-all ${
+                            isDragged ? "opacity-40 scale-95 border-dashed border-[#008060]" : ""
                           } ${
                             isActive 
-                              ? "border-cyan-500 ring-2 ring-cyan-500/50 shadow-md" 
-                              : "border-slate-800 hover:border-slate-700"
+                              ? "border-[#008060] ring-2 ring-[#008060]/20 shadow-sm" 
+                              : "border-[#e1e3e5] hover:border-[#babfc3]"
                           }`}
                         >
                           <img 
@@ -1675,13 +1675,13 @@ export default function App() {
                                   }
                               }
                             }}
-                            className="absolute top-1 right-1 bg-slate-950/90 hover:bg-rose-600 rounded p-1 text-slate-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10"
+                            className="absolute top-1 right-1 bg-white hover:bg-rose-600 border border-slate-200 hover:border-rose-600 rounded p-1 text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10 shadow-sm"
                             title="Убрать"
                           >
                             <Trash2 className="w-2.5 h-2.5" />
                           </button>
                           {isActive && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-cyan-600 text-[8px] text-black font-extrabold text-center py-0.5">
+                            <div className="absolute bottom-0 left-0 right-0 bg-[#008060] text-[8px] text-white font-extrabold text-center py-0.5">
                               {idx === 0 ? "ОБЛОЖКА" : "АКТИВНО"}
                             </div>
                           )}
@@ -1690,10 +1690,10 @@ export default function App() {
                     })}
                     <button
                       onClick={handleFileSelectBtn}
-                      className="aspect-square bg-slate-950 rounded-lg flex flex-col items-center justify-center text-slate-500 hover:text-cyan-400 hover:bg-slate-900 border border-slate-800 border-dashed transition-all"
+                      className="aspect-square bg-white rounded-lg flex flex-col items-center justify-center text-[#5c5f62] hover:text-[#008060] hover:bg-[#f1f8f5] border border-[#babfc3] hover:border-[#008060] border-dashed transition-all shadow-sm"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span className="text-[8px] mt-0.5 font-bold uppercase">Еще</span>
+                      <Plus className="w-4 h-4 text-[#5c5f62]" />
+                      <span className="text-[8px] mt-1 font-bold uppercase">Еще</span>
                     </button>
                   </div>
                 </div>
@@ -1701,35 +1701,35 @@ export default function App() {
             </div>
 
             {/* TRIGGER AI ANALYSIS TRIGGER ZONE */}
-            <div className="mt-4 pt-4 border-t border-slate-800 flex flex-col space-y-3">
+            <div className="mt-4 pt-4 border-t border-[#f1f2f4] flex flex-col space-y-3">
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <label className="block text-xs font-semibold text-[#202223] flex items-center justify-between">
                   <span>Дополнительные инструкции для ИИ</span>
-                  <span className="text-[10px] text-slate-500 font-normal">укажите, что именно нужно проанализировать</span>
+                  <span className="text-[10px] text-[#8c9196] font-normal">укажите, что именно нужно проанализировать</span>
                 </label>
                 <textarea
                   rows={2}
                   placeholder="Пример: Обрати внимание на материал, вырез, фасон или другие детали..."
                   value={userHint}
                   onChange={(e) => setUserHint(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+                  className="w-full bg-white border border-[#babfc3] rounded-lg p-2.5 text-xs text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors resize-none"
                 />
               </div>
 
               <button
                 disabled={!selectedImage || isAnalyzing}
                 onClick={analyzeImage}
-                className={`w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
+                className={`w-full py-3.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
                   !selectedImage 
-                    ? "bg-slate-800 text-slate-500 cursor-not-allowed" 
+                    ? "bg-[#f1f2f4] text-[#8c9196] border border-[#e1e3e5] cursor-not-allowed" 
                     : isAnalyzing 
-                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" 
-                    : "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20"
+                    ? "bg-[#f1f8f5] text-[#008060] border border-[#008060]/30 animate-pulse cursor-wait" 
+                    : "bg-[#008060] hover:bg-[#006e52] text-white font-bold shadow-sm active:bg-[#005e46]"
                 }`}
               >
                 {isAnalyzing ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#008060]" />
                     <span>Gemini GPT анализирует фото...</span>
                   </>
                 ) : (
@@ -1741,7 +1741,7 @@ export default function App() {
               </button>
 
               {analysisError && (
-                <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 flex items-start space-x-2">
+                <div className="p-3.5 bg-[#fbeae5] border border-[#f5c2b8] rounded-lg text-xs text-[#8a2512] flex items-start space-x-2">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{analysisError}</span>
                 </div>
@@ -1751,15 +1751,15 @@ export default function App() {
         </section>
 
         {/* RIGHT COLUMN: AI GENERATED EDITOR & PRESTASHOP METADATA WRITER - occupies 7 cols */}
-        <section className="lg:col-span-7 flex flex-col space-y-5">
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg flex-1 flex flex-col">
-            <h2 className="text-sm font-semibold tracking-wide text-cyan-400 uppercase mb-4 flex items-center space-x-1.5 justify-between">
+        <section className="lg:col-span-12 xl:col-span-7 flex flex-col space-y-5">
+          <div className="bg-white border border-[#e1e3e5] rounded-xl p-5 shadow-sm flex-1 flex flex-col">
+            <h2 className="text-xs font-bold tracking-wider text-[#008060] uppercase mb-4 flex items-center space-x-1.5 justify-between border-b border-[#f1f2f4] pb-2.5">
               <div className="flex items-center space-x-1.5">
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 text-[#008060]" />
                 <span>Редактор AI Метаданных товара</span>
               </div>
               {analysisResult && (
-                <span className="text-[10px] bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full text-cyan-300 font-mono tracking-normal">
+                <span className="text-[10px] bg-[#e1f0ea] border border-[#b4dfd2] px-2 py-0.5 rounded text-[#006e52] font-mono tracking-normal font-semibold">
                   Определено ИИ
                 </span>
               )}
@@ -1769,29 +1769,29 @@ export default function App() {
             <div className="flex-1 space-y-4">
               {/* Product Name */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223]">
                     Название товара (Title) *
                   </label>
                   <button
                     disabled={isGeneratingField.title || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("title"); }}
-                    className={`text-[10px] flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all ${
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
                       isGeneratingField.title
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 animate-pulse"
+                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
                         : !selectedImage
-                        ? "bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed"
-                        : "bg-slate-800/80 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 border-slate-700/60 hover:border-cyan-500/30 cursor-pointer shadow-sm"
+                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
+                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
                     }`}
                   >
                     {isGeneratingField.title ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                        <Loader2 className="w-3 h-3 animate-spin text-[#008060]" />
                         <span>Генерирую...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <Sparkles className="w-2.5 h-2.5 text-[#008060]" />
                         <span>Сгенерировать ИИ</span>
                       </>
                     )}
@@ -1802,14 +1802,14 @@ export default function App() {
                   placeholder="Добавьте фото или укажите название..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 transition-colors"
+                  className="w-full bg-white border border-[#babfc3] rounded-lg py-2 px-3 text-sm text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                 />
               </div>
 
               {/* SKU & Price in 2 column row */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-4">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#202223] mb-1.5">
                     Артикул / SKU (Reference)
                   </label>
                   <input 
@@ -1817,23 +1817,23 @@ export default function App() {
                     placeholder="Генерируется по ИИ"
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-white border border-[#babfc3] rounded-lg py-2 px-3 text-sm font-mono text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                   />
                 </div>
 
                 <div className="md:col-span-8">
-                  <span className="block text-xs font-semibold text-slate-300 mb-1">
+                  <span className="block text-xs font-semibold text-[#202223] mb-1.5">
                     Калькулятор цены (Розничная цена)
                   </span>
                   
-                  <div className="grid grid-cols-3 gap-2.5 bg-slate-900/60 p-2.5 border border-slate-800/80 rounded-xl">
+                  <div className="grid grid-cols-3 gap-2.5 bg-[#f9fafb] p-2.5 border border-[#e1e3e5] rounded-lg">
                     {/* Price Netto */}
                     <div>
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">
+                      <label className="block text-[10px] font-semibold text-[#5c5f62] mb-1">
                         Cena netto
                       </label>
                       <div className="relative">
-                        <span className="absolute left-2 text-[10px] select-none text-slate-500 font-bold top-2">
+                        <span className="absolute left-2.5 text-[10px] select-none text-[#8c9196] font-bold top-1.5">
                           {dataLanguage === "pl" ? "zł" : "₽"}
                         </span>
                         <input 
@@ -1842,20 +1842,20 @@ export default function App() {
                           placeholder="0.00"
                           value={price || ""}
                           onChange={(e) => handleNetPriceChange(parseFloat(e.target.value) || 0)}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 pl-5 pr-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono transition-colors"
+                          className="w-full bg-white border border-[#babfc3] rounded py-1 pl-6 pr-1 text-xs text-[#202223] focus:outline-none focus:border-[#008060] font-mono transition-colors"
                         />
                       </div>
                     </div>
 
                     {/* VAT Rate */}
                     <div>
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">
+                      <label className="block text-[10px] font-semibold text-[#5c5f62] mb-1">
                         VAT (Podatek)
                       </label>
                       <select
                         value={vatRate}
                         onChange={(e) => handleVatRateChange(parseInt(e.target.value, 10))}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-1 bg-no-repeat text-slate-200 text-[10px] focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-white border border-[#babfc3] rounded py-1 px-1.5 text-[#202223] text-[10px] focus:outline-none focus:border-[#008060]"
                       >
                         <option value={23}>PL 23%</option>
                         <option value={8}>PL 8%</option>
@@ -1867,11 +1867,11 @@ export default function App() {
 
                     {/* Price Brutto */}
                     <div>
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">
+                      <label className="block text-[10px] font-semibold text-[#5c5f62] mb-1">
                         Cena brutto
                       </label>
                       <div className="relative">
-                        <span className="absolute left-2 text-[10px] select-none text-slate-400 font-bold top-2">
+                        <span className="absolute left-2.5 text-[10px] select-none text-[#008060] font-bold top-1.5">
                           {dataLanguage === "pl" ? "zł" : "₽"}
                         </span>
                         <input 
@@ -1880,7 +1880,7 @@ export default function App() {
                           placeholder="0.00"
                           value={grossPrice || ""}
                           onChange={(e) => handleGrossPriceChange(parseFloat(e.target.value) || 0)}
-                          className="w-full bg-slate-950 border border-cyan-900 rounded-lg py-1.5 pl-5 pr-1.5 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono font-bold transition-colors"
+                          className="w-full bg-white border border-[#008060] rounded py-1 pl-6 pr-1 text-xs text-[#008060] focus:outline-none focus:ring-1 focus:ring-[#008060] font-mono font-bold transition-colors"
                         />
                       </div>
                     </div>
@@ -1889,14 +1889,14 @@ export default function App() {
               </div>
 
               {/* APPAREL SPECIAL FEATURES SECTION */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-                <p className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-cyan-400" />
+              <div className="bg-[#f9fafb] border border-[#e1e3e5] rounded-lg p-4 space-y-3 shadow-[inset_0_1px_1px_rgba(0,0,0,0.01)]">
+                <p className="text-xs font-bold text-[#008060] uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-[#008060]" />
                   <span>Характеристики товара и модель (Cechy)</span>
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1">
                       SKŁAD (Материал / Состав)
                     </label>
                     <input 
@@ -1904,11 +1904,11 @@ export default function App() {
                       placeholder="Например: 100% LEN / 100% Cotton"
                       value={sklad}
                       onChange={(e) => setSklad(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-white uppercase focus:outline-none focus:border-cyan-500 font-bold transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-md py-1.5 px-3 text-xs text-[#202223] uppercase focus:outline-none focus:border-[#008060] font-bold transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-semibold text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1">
                       MODELKA (Параметры модели)
                     </label>
                     <input 
@@ -1916,16 +1916,16 @@ export default function App() {
                       placeholder="Например: MA 175 CM WZROSTU I NOSI ROZMIAR S"
                       value={modelka}
                       onChange={(e) => setModelka(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-white uppercase focus:outline-none focus:border-cyan-500 font-bold transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-md py-1.5 px-3 text-xs text-[#202223] uppercase focus:outline-none focus:border-[#008060] font-bold transition-colors"
                     />
                   </div>
                 </div>
 
                 {/* Dynamic Combinations Editor */}
-                <div className="pt-3 border-t border-slate-800/60 space-y-2">
+                <div className="pt-3 border-t border-[#e1e3e5] space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-300 flex items-center space-x-1">
-                      <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                    <label className="block text-xs font-semibold text-[#202223] flex items-center space-x-1">
+                      <Layers className="w-3.5 h-3.5 text-[#008060]" />
                       <span>Комбинации / Варианты Товара ({suggestedVariants.length})</span>
                     </label>
                     <button
@@ -1940,28 +1940,28 @@ export default function App() {
                           }]);
                         }
                       }}
-                      className="text-[10px] bg-slate-800 hover:bg-slate-750 hover:text-white text-slate-300 py-1 px-2.5 rounded flex items-center space-x-1 transition-all border border-slate-700/60"
+                      className="text-[10px] bg-white hover:bg-[#f6f6f7] border border-[#babfc3] text-[#202223] py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all shadow-sm font-semibold hover:border-[#8c9196]"
                     >
-                      <Plus className="w-3 h-3 text-cyan-400" />
+                      <Plus className="w-3 h-3 text-[#008060]" />
                       <span>Добавить вариант</span>
                     </button>
                   </div>
                   
                   {suggestedVariants.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto p-1 bg-slate-900/40 rounded-xl border border-slate-800/70 custom-scrollbar">
+                    <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto p-1 bg-white rounded-lg border border-[#e1e3e5] custom-scrollbar">
                       {suggestedVariants.map((v, i) => (
                         <div 
                           key={i} 
-                          className="flex flex-col p-2.5 rounded-xl bg-slate-950 border border-slate-850 hover:border-slate-800 transition-all text-xs gap-2"
+                          className="flex flex-col p-2.5 rounded-lg bg-[#f9fafb] border border-[#e1e3e5] hover:border-[#babfc3] transition-all text-xs gap-2"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <span className="font-mono text-slate-200 block truncate font-medium" title={v.name}>
+                              <span className="font-mono text-[#202223] block truncate font-semibold" title={v.name}>
                                 {v.name}
                               </span>
                             </div>
-                            <div className="flex items-center space-x-1.5 shrink-0 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800/80">
-                              <span className="text-[10px] text-slate-500 uppercase tracking-wider">кол-во</span>
+                            <div className="flex items-center space-x-1.5 shrink-0 bg-white px-2 py-0.5 rounded border border-[#babfc3]">
+                              <span className="text-[10px] text-[#5c5f62] uppercase tracking-wider font-semibold">кол-во</span>
                               <input
                                 type="number"
                                 min="0"
@@ -1970,7 +1970,7 @@ export default function App() {
                                   const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10) || 0;
                                   setSuggestedVariants(prev => prev.map((item, idx) => idx === i ? { ...item, quantity: val } : item));
                                 }}
-                                className="w-12 bg-transparent text-center font-mono text-xs text-cyan-400 focus:outline-none font-bold"
+                                className="w-10 bg-transparent text-center font-mono text-xs text-[#008060] focus:outline-none font-bold"
                               />
                             </div>
                             <button 
@@ -1978,7 +1978,7 @@ export default function App() {
                                 e.preventDefault(); 
                                 setSuggestedVariants(prev => prev.filter((_, idx) => idx !== i)); 
                               }}
-                              className="text-slate-500 hover:text-red-400 shrink-0 p-1.5 rounded-lg hover:bg-red-500/10 transition-all"
+                              className="text-[#6d7175] hover:text-rose-600 shrink-0 p-1 rounded hover:bg-rose-50 transition-all border border-transparent hover:border-rose-100"
                               title="Удалить комбинацию"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1987,10 +1987,10 @@ export default function App() {
 
                           {/* Interactive list of uploaded photos to link them */}
                           {uploadedImages.length > 0 && (
-                            <div className="border-t border-slate-900 pt-2">
-                              <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-                                <span>Выберите фото для этого цвета:</span>
-                                <span className="font-semibold text-cyan-400">
+                            <div className="border-t border-[#e1e3e5] pt-2">
+                              <div className="flex items-center justify-between text-[10px] text-[#5c5f62] mb-1.5">
+                                <span className="font-medium">Выберите фото для этого цвета:</span>
+                                <span className="font-bold text-[#008060]">
                                   {(() => {
                                     const explicitIds = v.selectedImageIds || getAutoSelectedImageIds(v.name, uploadedImages);
                                     return `активно ${explicitIds.length} из ${uploadedImages.length}`;
@@ -2020,10 +2020,10 @@ export default function App() {
                                           isCustomPhotoSelection: true 
                                         } : item));
                                       }}
-                                      className={`relative w-8 h-8 rounded-md overflow-hidden border-2 transition-all hover:scale-105 active:scale-95 ${
+                                      className={`relative w-8 h-8 rounded overflow-hidden border-2 transition-all hover:scale-105 active:scale-95 ${
                                         isSelected 
-                                          ? "border-cyan-500 shadow-md shadow-cyan-500/20" 
-                                          : "border-transparent opacity-40 hover:opacity-75"
+                                          ? "border-[#008060] shadow-sm ring-1 ring-[#008060]" 
+                                          : "border-transparent opacity-45 hover:opacity-75"
                                       }`}
                                       title={img.fileName || "Изображение"}
                                     >
@@ -2034,8 +2034,8 @@ export default function App() {
                                         referrerPolicy="no-referrer"
                                       />
                                       {isSelected && (
-                                        <div className="absolute inset-0 bg-cyan-900/10 flex items-center justify-center">
-                                          <div className="w-2 h-2 rounded-full bg-cyan-400 border border-slate-950 animate-pulse" />
+                                        <div className="absolute inset-0 bg-[#008060]/10 flex items-center justify-center">
+                                          <div className="w-2 h-2 rounded-full bg-[#008060] border border-white animate-pulse" />
                                         </div>
                                       )}
                                     </button>
@@ -2048,7 +2048,7 @@ export default function App() {
                       ))}
                     </div>
                   ) : (
-                    <div className="p-3 bg-slate-900/20 rounded-xl border border-dashed border-slate-800 text-[11px] text-slate-500 text-center">
+                    <div className="p-3 bg-[#fafbfa] rounded-lg border border-dashed border-[#e1e3e5] text-[11px] text-[#8c9196] text-center">
                       Нет активных комбинаций. Товар будет импортирован как один базовый продукт.
                     </div>
                   )}
@@ -2057,29 +2057,29 @@ export default function App() {
 
               {/* Short description */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223]">
                     Краткое описание (Short Description)
                   </label>
                   <button
                     disabled={isGeneratingField.description_short || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("description_short"); }}
-                    className={`text-[10px] flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all ${
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
                       isGeneratingField.description_short
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 animate-pulse"
+                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
                         : !selectedImage
-                        ? "bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed"
-                        : "bg-slate-800/80 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 border-slate-700/60 hover:border-cyan-500/30 cursor-pointer shadow-sm"
+                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
+                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
                     }`}
                   >
                     {isGeneratingField.description_short ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                        <Loader2 className="w-3 h-3 animate-spin text-[#008060]" />
                         <span>Генерирую...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <Sparkles className="w-2.5 h-2.5 text-[#008060]" />
                         <span>Сгенерировать ИИ</span>
                       </>
                     )}
@@ -2090,39 +2090,39 @@ export default function App() {
                   placeholder="Короткий слоган или тизер для списков..."
                   value={descShort}
                   onChange={(e) => setDescShort(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+                  className="w-full bg-white border border-[#babfc3] rounded-lg py-2 px-3 text-sm text-[#202223] placeholder-[#8c9196] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors resize-none"
                 />
               </div>
 
               {/* Long Description with HTML support */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-[#202223] flex items-center space-x-1.5">
                     <span>Полное подробное описание (Description HTML)</span>
-                    <span className="text-[10px] text-slate-500 flex items-center space-x-1 font-normal">
-                      <Eye className="w-3 h-3" />
+                    <span className="text-[10px] text-[#5c5f62] flex items-center space-x-1 font-normal">
+                      <Eye className="w-3 h-3 text-[#5c5f62]" />
                       <span>HTML-верстка</span>
                     </span>
                   </label>
                   <button
                     disabled={isGeneratingField.description || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("description"); }}
-                    className={`text-[10px] flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all ${
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
                       isGeneratingField.description
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 animate-pulse"
+                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
                         : !selectedImage
-                        ? "bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed"
-                        : "bg-slate-800/80 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 border-slate-700/60 hover:border-cyan-500/30 cursor-pointer shadow-sm"
+                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
+                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
                     }`}
                   >
                     {isGeneratingField.description ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                        <Loader2 className="w-3 h-3 animate-spin text-[#008060]" />
                         <span>Генерирую...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <Sparkles className="w-2.5 h-2.5 text-[#008060]" />
                         <span>Сгенерировать ИИ</span>
                       </>
                     )}
@@ -2133,20 +2133,20 @@ export default function App() {
                   placeholder="Детальные свойства, преимущества, спецификации продукта..."
                   value={descLong}
                   onChange={(e) => setDescLong(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-xs font-mono text-slate-100 focus:outline-none focus:border-cyan-500 transition-colors"
+                  className="w-full bg-white border border-[#babfc3] rounded-lg py-2.5 px-4 text-xs font-mono text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                 />
               </div>
 
               {/* Dynamic Categories Mapping from Server */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <label className="block text-xs font-semibold text-[#202223] flex items-center justify-between">
                   <span>Категории Продукта в PrestaShop</span>
-                  {isLoadingCategories && <Loader2 className="w-3 h-3 animate-spin text-cyan-400" />}
+                  {isLoadingCategories && <Loader2 className="w-3 h-3 animate-spin text-[#008060]" />}
                 </label>
 
                 {psCategories.length > 0 ? (
                   <>
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar">
+                    <div className="bg-white border border-[#e1e3e5] rounded-xl p-3 max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar">
                       {psCategories.map((c) => {
                         const isChecked = selectedCategories.includes(c.id);
                         const nameLower = c.name.toLowerCase();
@@ -2157,8 +2157,8 @@ export default function App() {
                             key={c.id} 
                             className={`flex items-center space-x-2.5 p-2 rounded-lg cursor-pointer transition-all border ${
                               isChecked 
-                                ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-200" 
-                                : "border-transparent text-slate-400 hover:bg-slate-800/40 hover:text-slate-200"
+                                ? "bg-[#f1f8f5] border-[#c3e6dc] text-[#006e52]" 
+                                : "border-transparent text-[#5c5f62] hover:bg-[#f6f6f7] hover:text-[#202223]"
                             }`}
                           >
                             <input
@@ -2172,12 +2172,12 @@ export default function App() {
                                   setSelectedCategories(prev => [...prev, c.id]);
                                 }
                               }}
-                              className="rounded bg-slate-950 border-slate-800 text-cyan-600 focus:ring-cyan-500/30 w-4 h-4 shrink-0 transition-all checked:bg-cyan-500"
+                              className="rounded border-[#babfc3] text-[#008060] focus:ring-[#008060]/30 w-4 h-4 shrink-0 transition-all checked:bg-[#008060]"
                             />
-                            <span className="text-xs font-medium flex items-center justify-between w-full">
+                            <span className="text-xs font-semibold flex items-center justify-between w-full">
                               <span>{c.name}</span>
-                              <span className="text-[10px] text-slate-500 font-mono">
-                                ID {c.id} {isDefaultLabel && <span className="text-cyan-500 font-sans font-normal ml-1">(Всегда выбран)</span>}
+                              <span className="text-[10px] text-[#8c9196] font-mono">
+                                ID {c.id} {isDefaultLabel && <span className="text-[#008060] font-sans font-normal ml-1">(Всегда выбран)</span>}
                               </span>
                             </span>
                           </label>
@@ -2187,22 +2187,22 @@ export default function App() {
 
                     {/* Default Category Selector */}
                     {selectedCategories.length > 0 && (
-                      <div className="mt-3 space-y-1 bg-slate-900 border border-slate-800 p-3 rounded-xl block">
-                        <label className="block text-xs font-semibold text-slate-300">
+                      <div className="mt-3 space-y-1.5 bg-[#f9fafb] border border-[#e1e3e5] p-3 rounded-lg block">
+                        <label className="block text-xs font-bold text-[#202223]">
                           {dataLanguage === "pl" ? "Domyślna kategoria" : "Основная категория (Domyślna kategoria)"}
                         </label>
                         <select
                           value={defaultCategoryId || ""}
                           onChange={(e) => setDefaultCategoryId(parseInt(e.target.value, 10))}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 transition-colors"
+                          className="w-full bg-white border border-[#babfc3] rounded-lg py-1.5 px-3 text-xs text-[#202223] focus:outline-none focus:border-[#008060] transition-colors"
                         >
                           {psCategories.filter(c => selectedCategories.includes(c.id)).map((c) => (
-                            <option key={c.id} value={c.id} className="bg-slate-950 text-slate-200 text-xs">
+                            <option key={c.id} value={c.id} className="bg-white text-[#202223] text-xs">
                               {c.name} (ID {c.id})
                             </option>
                           ))}
                         </select>
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-[10px] text-[#5c5f62]">
                           {dataLanguage === "pl" 
                             ? "Wybierz główną kategorię, w której ma znajdować się produkt."
                             : "Выберите главную категорию, в которой будет находиться созданный товар."}
@@ -2211,7 +2211,7 @@ export default function App() {
                     )}
                   </>
                 ) : (
-                  <div className="p-3 bg-slate-900 rounded-xl border border-slate-800/80 text-xs text-slate-500 flex items-center justify-between">
+                  <div className="p-3 bg-white rounded-lg border border-[#e1e3e5] text-xs text-[#5c5f62] flex items-center justify-between">
                     <span>
                       {categoryLoadError 
                         ? "Не удалось загрузить категории. Проверьте соединение." 
@@ -2219,7 +2219,7 @@ export default function App() {
                     </span>
                     <button 
                       onClick={(e) => { e.preventDefault(); setShowSettings(true); }}
-                      className="text-cyan-400 hover:underline font-medium ml-2 shrink-0"
+                      className="text-[#008060] hover:underline font-bold ml-2 shrink-0"
                     >
                       Настроить
                     </button>
@@ -2229,21 +2229,21 @@ export default function App() {
             </div>
 
             {/* SYNC OPERATION CONTROLLER SECTION */}
-            <div className="mt-5 pt-4 border-t border-slate-800 flex flex-col space-y-3">
+            <div className="mt-5 pt-4 border-t border-[#f1f2f4] flex flex-col space-y-3">
               <button
                 disabled={!title || isSyncing}
                 onClick={publishProduct}
-                className={`w-full py-4 rounded-xl text-sm font-semibold flex items-center justify-center space-x-1.5 transition-all ${
+                className={`w-full py-4 rounded-lg text-sm font-semibold flex items-center justify-center space-x-1.5 transition-all ${
                   !title 
-                    ? "bg-slate-800 text-slate-500 cursor-not-allowed" 
+                    ? "bg-[#f1f2f4] text-[#8c9196] border border-[#e1e3e5] cursor-not-allowed" 
                     : isSyncing 
-                    ? "bg-indigo-600/30 text-indigo-300 cursor-wait border border-indigo-500/20" 
-                    : "bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/40"
+                    ? "bg-[#f1f8f5] text-[#008060] border border-[#008060]/30 animate-pulse cursor-wait font-semibold" 
+                    : "bg-[#008060] hover:bg-[#006e52] text-white font-bold shadow-sm active:bg-[#005e46]"
                 }`}
               >
                 {isSyncing ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white mr-1" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#008060] mr-1" />
                     <span>Синхронизация и загрузка фото в PrestaShop...</span>
                   </>
                 ) : (
@@ -2256,27 +2256,27 @@ export default function App() {
 
               {/* SYNC FEEDBACK BANNER */}
               {syncStatus && (
-                <div className={`p-4 rounded-xl border text-xs ${
+                <div className={`p-4 rounded-lg border text-xs ${
                   syncStatus.success 
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                    : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    ? "bg-[#e1f0ea] text-[#006e52] border-[#b4dfd2]" 
+                    : "bg-[#fbeae5] text-[#8a2512] border-[#f5c2b8]"
                 }`}>
                   {syncStatus.success ? (
                     <div className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle className="w-4 h-4 text-[#008060] shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-emerald-300">Товар успешно создан!</p>
-                        <p className="text-slate-400 mt-0.5">Внесен в базу данных PrestaShop с назначенным ID: <strong className="text-white">#{syncStatus.productId}</strong>.</p>
-                        <p className="text-slate-500 text-[10px] mt-1">Фотография товара автоматически прикреплена и загружена во внутренние медиа магазина.</p>
+                        <p className="font-bold text-[#006e52]">Товар успешно создан!</p>
+                        <p className="text-[#202223] mt-0.5">Внесен в базу данных PrestaShop с назначенным ID: <strong>#{syncStatus.productId}</strong>.</p>
+                        <p className="text-[#5c5f62] text-[10px] mt-1">Фотография товара автоматически прикреплена и загружена во внутренние медиа магазина.</p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-start space-x-2">
-                      <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-rose-300">Ошибка импорта в магазин</p>
-                        <p className="text-slate-400 mt-1">Причина: {syncStatus.error}</p>
-                        <p className="text-[10px] text-slate-500 mt-1">Возможно, неверно указан ID языка или у API-ключа отсутствуют разрешения каталога.</p>
+                        <p className="font-semibold text-rose-800">Ошибка импорта в магазин</p>
+                        <p className="text-[#202223] mt-1">Причина: {syncStatus.error}</p>
+                        <p className="text-[10px] text-[#5c5f62] mt-1">Возможно, неверно указан ID языка или у API-ключа отсутствуют разрешения каталога.</p>
                       </div>
                     </div>
                   )}
@@ -2289,26 +2289,26 @@ export default function App() {
       </main>
 
       {/* SESSION TIMELINE/HISTORY FOOTER PANEL */}
-      <footer className="border-t border-slate-800 bg-slate-950 px-6 py-5">
+      <footer className="border-t border-[#e1e3e5] bg-white px-6 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <BarChart className="w-4.5 h-4.5 text-cyan-400" />
-              <h2 className="text-sm font-semibold text-white">Лента активности текущей сессии ({history.length})</h2>
+              <BarChart className="w-4.5 h-4.5 text-[#008060]" />
+              <h2 className="text-sm font-bold text-[#202223]">Лента активности текущей сессии ({history.length})</h2>
             </div>
             {history.length > 0 && (
               <button 
                 onClick={clearHistory}
-                className="text-xs text-rose-400 flex items-center gap-1 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-850 hover:text-rose-300 transition-colors"
+                className="text-xs text-rose-600 hover:text-rose-700 bg-white border border-[#babfc3] hover:bg-rose-50 px-3.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold hover:border-rose-300"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                 <span>Очистить сессию</span>
               </button>
             )}
           </div>
 
           {history.length === 0 ? (
-            <div className="text-center py-6 border border-slate-800/80 rounded-xl bg-slate-900/10 text-xs text-slate-500">
+            <div className="text-center py-8 border border-dashed border-[#babfc3] rounded-xl bg-[#fafbfa] text-xs text-[#6d7175]">
               Вы еще не опубликовали товары в этой сессии. Загрузите фото и нажмите «Анализировать» для старта.
             </div>
           ) : (
@@ -2316,12 +2316,12 @@ export default function App() {
               {history.map((item) => (
                 <div 
                   key={item.id} 
-                  className={`bg-slate-900 border rounded-xl overflow-hidden shadow-md flex p-3.5 relative items-center space-x-3.5 ${
-                    item.status === "success" ? "border-emerald-500/20" : "border-rose-500/20"
+                  className={`bg-white border rounded-xl overflow-hidden shadow-sm flex p-3.5 relative items-center space-x-3.5 hover:shadow-md transition-shadow ${
+                    item.status === "success" ? "border-[#b4dfd2]" : "border-rose-100"
                   }`}
                 >
                   {/* Small preview */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#fafbfa] flex-shrink-0 border border-[#e1e3e5]">
                     {item.image ? (
                       <img 
                         src={item.image} 
@@ -2330,7 +2330,7 @@ export default function App() {
                         referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-600 bg-slate-905">
+                      <div className="w-full h-full flex items-center justify-center text-[#8c9196] bg-[#f9fafb]">
                         <Camera className="w-4 h-4" />
                       </div>
                     )}
@@ -2338,24 +2338,24 @@ export default function App() {
 
                   {/* Text properties */}
                   <div className="flex-1 min-w-0 pr-6">
-                    <p className="text-xs font-bold text-white truncate">{item.productData.title}</p>
-                    <p className="text-[10px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
+                    <p className="text-xs font-bold text-[#202223] truncate">{item.productData.title}</p>
+                    <p className="text-[10px] text-[#5c5f62] flex items-center space-x-1.5 mt-0.5">
                       <span>REF:</span> 
-                      <span className="font-mono text-cyan-400">{item.productData.sku || "N/A"}</span>
+                      <span className="font-mono text-[#008060] font-semibold">{item.productData.sku || "N/A"}</span>
                       <span>•</span>
                       <span>Цена:</span>
-                      <span className="text-slate-200">{item.productData.price || 0} {dataLanguage === "pl" ? "zł" : "₽"}</span>
+                      <span className="text-[#202223] font-bold font-mono">{item.productData.price || 0} {dataLanguage === "pl" ? "zł" : "₽"}</span>
                     </p>
 
                     <div className="flex items-center space-x-1.5 mt-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
                         item.status === "success" 
-                          ? "bg-emerald-500/15 text-emerald-400" 
-                          : "bg-rose-500/15 text-rose-400"
+                          ? "bg-[#e1f0ea] text-[#006e52] border-[#b4dfd2]" 
+                          : "bg-[#fbeae5] text-[#8a2512] border-[#f5c2b8]"
                       }`}>
                         {item.status === "success" ? `PrestaShop ID #${item.prestashopId}` : "Ошибка загрузки"}
                       </span>
-                      <span className="text-[9px] text-slate-500 font-mono">{item.timestamp}</span>
+                      <span className="text-[9px] text-[#8c9196] font-mono">{item.timestamp}</span>
                     </div>
                   </div>
 
@@ -2364,7 +2364,7 @@ export default function App() {
                     {/* Edit button */}
                     <button 
                       onClick={() => handleStartEdit(item)}
-                      className="text-slate-500 hover:text-cyan-400 p-1 rounded-md transition-colors bg-slate-950/20 backdrop-blur-sm"
+                      className="text-[#5c5f62] hover:text-[#008060] p-1 rounded-md transition-colors bg-[#f6f6f7] hover:bg-[#e1f0ea]"
                       title="Редактировать товар"
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -2372,7 +2372,7 @@ export default function App() {
                     {/* Delete button */}
                     <button 
                       onClick={() => deleteHistoryItem(item.id)}
-                      className="text-slate-500 hover:text-rose-400 p-1 rounded-md transition-colors bg-slate-950/20 backdrop-blur-sm"
+                      className="text-[#5c5f62] hover:text-rose-600 p-1 rounded-md transition-colors bg-[#f6f6f7] hover:bg-rose-50"
                       title="Убрать лог"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -2388,47 +2388,49 @@ export default function App() {
       {/* EDITING ITEM GALLERY MODAL */}
       <AnimatePresence>
         {editingItem && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#202223]/60 backdrop-blur-sm">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+              className="bg-white border border-[#e1e3e5] rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-xl"
             >
               {/* Modal Header */}
-              <div className="border-b border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-950">
+              <div className="border-b border-[#f1f2f4] px-6 py-4 flex items-center justify-between bg-white">
                 <div className="flex items-center space-x-2">
-                  <Pencil className="w-4 h-4 text-cyan-400" />
-                  <h3 className="font-semibold text-white">Редактирование товара в галерее</h3>
+                  <Pencil className="w-4 h-4 text-[#008060]" />
+                  <h3 className="font-bold text-[#202223] text-sm">Редактирование товара в галерее</h3>
                 </div>
                 <button 
                   onClick={() => setEditingItem(null)}
-                  className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-850"
+                  className="text-[#5c5f62] hover:text-[#202223] p-1.5 rounded-lg hover:bg-[#f6f6f7]"
                 >
-                  <XCircle className="w-5 h-5" />
+                  <XCircle className="w-5 h-5 text-[#5c5f62]" />
                 </button>
               </div>
 
               {/* Modal scrollable body */}
-              <div className="p-6 overflow-y-auto space-y-4 max-h-[calc(90vh-140px)]">
+              <div className="p-6 overflow-y-auto space-y-4 max-h-[calc(90vh-140px)] bg-white">
                 {/* Product image and basic status */}
-                <div className="flex items-center space-x-4 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800">
+                <div className="flex items-center space-x-4 bg-[#f9fafb] p-3 rounded-lg border border-[#e1e3e5]">
+                  <div className="w-16 h-16 rounded overflow-hidden bg-white flex-shrink-0 border border-[#e1e3e5]">
                     {editingItem.image ? (
                       <img src={editingItem.image} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-705 bg-slate-950">
+                      <div className="w-full h-full flex items-center justify-center text-[#8c9196] bg-[#fafbfa]">
                         <Camera className="w-5 h-5" />
                       </div>
                     )}
                   </div>
                   <div>
-                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                      editingItem.status === "success" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
+                      editingItem.status === "success" 
+                        ? "bg-[#e1f0ea] border-[#b4dfd2] text-[#006e52]" 
+                        : "bg-[#fafbfa] border-[#e1e3e5] text-[#5c5f62]"
                     }`}>
                       {editingItem.status === "success" ? `PrestaShop ID: #${editingItem.prestashopId}` : "Локальный черновик"}
                     </span>
-                    <p className="text-xs text-slate-400 mt-1">Опубликован: {editingItem.timestamp}</p>
+                    <p className="text-xs text-[#5c5f62] mt-1">Опубликован: {editingItem.timestamp}</p>
                   </div>
                 </div>
 
@@ -2436,30 +2438,30 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Title */}
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Название товара</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Название товара</label>
                     <input 
                       type="text" 
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                     />
                   </div>
 
                   {/* SKU */}
                   <div>
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Артикул (SKU)</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Артикул (SKU)</label>
                     <input 
                       type="text" 
                       value={editSku}
                       onChange={(e) => setEditSku(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                     />
                   </div>
 
                   {/* Pricing Fields */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Цена (без НДС)</label>
+                      <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Цена (без НДС)</label>
                       <input 
                         type="number" 
                         step="0.01"
@@ -2469,11 +2471,11 @@ export default function App() {
                           setEditPrice(val);
                           setEditGrossPrice(parseFloat((val * (1 + vatRate / 100)).toFixed(2)));
                         }}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                        className="w-full bg-white border border-[#babfc3] rounded-lg px-3 py-2 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Цена (с НДС)</label>
+                      <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Цена (с НДС)</label>
                       <input 
                         type="number" 
                         step="0.01"
@@ -2483,76 +2485,76 @@ export default function App() {
                           setEditGrossPrice(val);
                           setEditPrice(parseFloat((val / (1 + vatRate / 100)).toFixed(2)));
                         }}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                        className="w-full bg-white border border-[#008060] rounded-lg px-3 py-2 text-sm text-[#008060] focus:outline-none focus:ring-1 focus:ring-[#008060] transition-colors font-semibold"
                       />
                     </div>
                   </div>
 
                   {/* Composition / Sklad */}
                   <div>
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Состав ткани (Skład)</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Состав ткани (Skład)</label>
                     <input 
                       type="text" 
                       value={editSklad}
                       onChange={(e) => setEditSklad(e.target.value)}
                       placeholder="Например, 100% лен"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                     />
                   </div>
 
                   {/* Model specifications */}
                   <div>
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Информация о модели</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Информация о модели</label>
                     <input 
                       type="text" 
                       value={editModelka}
                       onChange={(e) => setEditModelka(e.target.value)}
                       placeholder="Например, Рост 175 см, размер S"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-sm text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors"
                     />
                   </div>
 
                   {/* Description Short */}
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Краткое описание</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Краткое описание</label>
                     <textarea 
                       value={editDescShort}
                       onChange={(e) => setEditDescShort(e.target.value)}
                       rows={2}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-sans"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-xs text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors font-sans"
                     />
                   </div>
 
                   {/* Description Long */}
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1.5">Полное описание</label>
+                    <label className="block text-[10px] uppercase font-bold text-[#5c5f62] mb-1.5">Полное описание</label>
                     <textarea 
                       value={editDescLong}
                       onChange={(e) => setEditDescLong(e.target.value)}
                       rows={5}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-sans"
+                      className="w-full bg-white border border-[#babfc3] rounded-lg px-3.5 py-2 text-xs text-[#202223] focus:outline-none focus:border-[#008060] focus:ring-1 focus:ring-[#008060] transition-colors font-sans"
                     />
                   </div>
                 </div>
 
                 {/* Remote database sync notifications */}
                 {updateStatus && (
-                  <div className={`p-4 rounded-xl border text-xs ${
+                  <div className={`p-4 rounded-lg border text-xs ${
                     updateStatus.success 
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                      : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                      ? "bg-[#e1f0ea] text-[#006e52] border-[#b4dfd2]" 
+                      : "bg-[#fbeae5] text-[#8a2512] border-[#f5c2b8]"
                   }`}>
                     {updateStatus.success ? (
                       <div className="flex items-center space-x-2">
-                        <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
-                        <span>Товар успешно обновлен непосредственно на сервере PrestaShop и зафиксирован локально!</span>
+                        <CheckCircle className="w-4 h-4 shrink-0 text-[#008060]" />
+                        <span className="font-semibold">Товар успешно обновлен непосредственно на сервере PrestaShop и зафиксирован локально!</span>
                       </div>
                     ) : (
                       <div className="flex items-start space-x-2">
-                        <XCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                        <XCircle className="w-4 h-4 shrink-0 text-[#8a2512] mt-0.5" />
                         <div>
-                          <p className="font-semibold">Ошибка обновления в магазине</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">{updateStatus.error}</p>
+                          <p className="font-bold">Ошибка обновления в магазине</p>
+                          <p className="text-[11px] text-[#202223] mt-0.5">{updateStatus.error}</p>
                         </div>
                       </div>
                     )}
@@ -2561,11 +2563,11 @@ export default function App() {
               </div>
 
               {/* Modal Footer Controls */}
-              <div className="border-t border-slate-800 px-6 py-4 bg-slate-950 flex flex-wrap gap-2.5 items-center justify-between font-sans">
+              <div className="border-t border-[#f1f2f4] px-6 py-4 bg-[#f9fafb] flex flex-wrap gap-2.5 items-center justify-between font-sans">
                 <div>
                   <button 
                     onClick={handleLoadIntoWorkspace}
-                    className="text-xs bg-slate-900 border border-slate-800 text-slate-200 px-4 py-2 rounded-xl hover:bg-slate-850 hover:text-white transition-colors"
+                    className="text-xs bg-white border border-[#babfc3] text-[#202223] px-4 py-2 rounded-lg hover:bg-[#f6f6f7] hover:border-[#8c9196] transition-colors font-semibold shadow-sm"
                     title="Загрузить свойства этого товара в основную панель слияния"
                   >
                     Загрузить в редактор
@@ -2575,14 +2577,14 @@ export default function App() {
                 <div className="flex items-center space-x-2">
                   <button 
                     onClick={() => setEditingItem(null)}
-                    className="text-xs text-slate-400 hover:text-white px-4 py-2 transition-colors"
+                    className="text-xs text-[#5c5f62] hover:text-[#202223] hover:underline px-4 py-2 transition-colors font-semibold"
                   >
                     Отмена
                   </button>
                   
                   <button 
                     onClick={handleSaveLocalChanges}
-                    className="text-xs bg-slate-305 hover:bg-white text-slate-900 font-medium px-4 py-2 rounded-xl bg-white transition-colors"
+                    className="text-xs bg-[#008060] hover:bg-[#006e52] text-white font-bold px-4 py-2 rounded-lg transition-colors shadow-sm active:bg-[#005e46]"
                   >
                     Сохранить локально
                   </button>
@@ -2591,7 +2593,7 @@ export default function App() {
                     <button 
                       onClick={handleUpdateInPrestaShop}
                       disabled={isUpdatingPrestaShop}
-                      className="text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-xl font-medium shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-xs bg-white border border-[#babfc3] hover:border-[#008060] text-[#008060] hover:bg-[#f1f8f5] px-4 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isUpdatingPrestaShop ? (
                         <>
