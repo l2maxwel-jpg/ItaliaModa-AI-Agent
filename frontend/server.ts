@@ -1233,38 +1233,74 @@ function isColorMatch(variantColorName: string, imageColorGroup: string, imageFi
 }
 
 async function getProductImageIds(shopUrl: string, apiKey: string, productId: number): Promise<number[]> {
-  // Strategy A (preferred): query the dedicated /images/products/{id} endpoint,
-  // which returns a flat list of image IDs for the product:
-  //   <image id="123" xlink:href="..."/>  or  <image><id>123</id></image>
-  // Strategy B (fallback): parse the <associations><images>...</images></associations>
-  // block embedded inside the product XML.
-  const extractIds = (xml: string): number[] => {
-    // Try to narrow to the <images> association block when present
-    const blockMatch = xml.match(/<images\b[^>]*>([\s\S]*?)<\/images>/i);
-    const scope = blockMatch ? blockMatch[1] : xml;
+  // PrestaShop returns image IDs in two different shapes depending on endpoint:
+  //   /api/products/{id}?display=full → <associations><images><image><id>N</id></image>...</images></associations>
+  //   /api/images/products/{id}        → <image id="{productId}"><declination id="N"/>...</image>  (PS 8+)
+  //                                       OR <prestashop><image><i><id>N</id></i>...</image></prestashop>
+  //
+  // We try the products endpoint first because its <associations><images> block
+  // has the most consistent format across PrestaShop versions.
+
+  const parseAssociationsImagesBlock = (xml: string): number[] => {
+    // Locate the inner <images>...</images> ASSOCIATIONS block (not the top-level image list)
+    const associationsMatch = xml.match(/<associations\b[^>]*>([\s\S]*?)<\/associations>/i);
+    const associationsXml = associationsMatch ? associationsMatch[1] : xml;
+    const blockMatch = associationsXml.match(/<images\b[^>]*>([\s\S]*?)<\/images>/i);
+    if (!blockMatch) return [];
+    const block = blockMatch[1];
     const ids: number[] = [];
     const seen = new Set<number>();
-
-    // Pattern 1: <image id="123" .../>  (self-closing with id attribute)
-    for (const m of scope.matchAll(/<image\b[^>]*\bid=["'](\d+)["'][^>]*\/?>/gi)) {
-      const n = parseInt(m[1], 10);
-      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
-    }
-    // Pattern 2: <image ...><id>123</id></image>
-    for (const m of scope.matchAll(/<image\b[^>]*>[\s\S]*?<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>[\s\S]*?<\/image>/gi)) {
-      const n = parseInt(m[1], 10);
-      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
-    }
-    // Pattern 3: <image xlink:href="...">123</image>  (id as element text)
-    for (const m of scope.matchAll(/<image\b[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/image>/gi)) {
+    // Within associations, each image is <image><id>NNN</id></image>
+    for (const m of block.matchAll(/<image\b[^>]*>[\s\S]*?<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>[\s\S]*?<\/image>/gi)) {
       const n = parseInt(m[1], 10);
       if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
     }
     return ids;
   };
 
+  const parseImagesEndpoint = (xml: string, expectedProductId: number): number[] => {
+    const ids: number[] = [];
+    const seen = new Set<number>();
+    // PS8 shape: <image id="{productId}"><declination id="NNN"/>...</image>
+    for (const m of xml.matchAll(/<declination\b[^>]*\bid=["'](\d+)["'][^>]*\/?>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n) && n !== expectedProductId) { ids.push(n); seen.add(n); }
+    }
+    if (ids.length > 0) return ids;
+    // Alternative shape: <i><id>NNN</id></i>
+    for (const m of xml.matchAll(/<i\b[^>]*>\s*<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>\s*<\/i>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
+    }
+    if (ids.length > 0) return ids;
+    // Alternative shape: top-level <image><id>NNN</id></image> repeated
+    for (const m of xml.matchAll(/<image\b[^>]*>\s*<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>\s*<\/image>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n) && n !== expectedProductId) { ids.push(n); seen.add(n); }
+    }
+    return ids;
+  };
+
   try {
-    // Strategy A: dedicated images endpoint
+    // Strategy A: product XML with display=full (most reliable)
+    const { response: prodRes, text: prodText } = await fetchPrestashop(
+      shopUrl,
+      apiKey,
+      `products/${productId}?display=full`,
+      "GET"
+    );
+    if (prodRes.ok) {
+      const ids = parseAssociationsImagesBlock(prodText);
+      if (ids.length > 0) {
+        dlog(`[getProductImageIds] (via products/${productId}?display=full) found IDs:`, ids);
+        return ids;
+      }
+      console.warn(`[getProductImageIds] No IDs from products/${productId}?display=full. Associations head: ${(prodText.match(/<associations\b[^>]*>[\s\S]{0,800}/i) || ["<no associations>"])[0]}`);
+    } else {
+      console.warn(`[getProductImageIds] products/${productId}?display=full HTTP ${prodRes.status}`);
+    }
+
+    // Strategy B: dedicated images endpoint
     const { response: imgRes, text: imgText } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -1272,35 +1308,15 @@ async function getProductImageIds(shopUrl: string, apiKey: string, productId: nu
       "GET"
     );
     if (imgRes.ok) {
-      const ids = extractIds(imgText);
-      if (ids.length > 0) {
-        dlog(`[getProductImageIds] (via images/products/${productId}) found IDs:`, ids);
-        return ids;
+      const ids = parseImagesEndpoint(imgText, productId);
+      dlog(`[getProductImageIds] (via images/products/${productId}) found IDs:`, ids);
+      if (ids.length === 0) {
+        console.warn(`[getProductImageIds] Could not parse image IDs. XML head: ${imgText.substring(0, 600).replace(/\n/g, " ")}`);
       }
-      // Empty list might be valid (no images), but fall through to Strategy B
-      // in case the response shape was unexpected.
-      console.warn(`[getProductImageIds] images/products/${productId} returned no IDs. XML head: ${imgText.substring(0, 400).replace(/\n/g, " ")}`);
-    } else {
-      console.warn(`[getProductImageIds] images/products/${productId} HTTP ${imgRes.status}`);
+      return ids;
     }
-
-    // Strategy B: associations from full product
-    const { response, text } = await fetchPrestashop(
-      shopUrl,
-      apiKey,
-      `products/${productId}?display=full`,
-      "GET"
-    );
-    if (!response.ok) {
-      console.warn(`[getProductImageIds] products/${productId}?display=full HTTP ${response.status}`);
-      return [];
-    }
-    const ids = extractIds(text);
-    dlog(`[getProductImageIds] (via products/${productId}?display=full) found IDs:`, ids);
-    if (ids.length === 0) {
-      console.warn(`[getProductImageIds] Could not parse any image IDs. Associations snippet: ${(text.match(/<images\b[^>]*>[\s\S]{0,500}/i) || ["<no images block>"])[0]}`);
-    }
-    return ids;
+    console.warn(`[getProductImageIds] images/products/${productId} HTTP ${imgRes.status}`);
+    return [];
   } catch (err) {
     console.error("Error fetching product image IDs:", err);
     return [];
