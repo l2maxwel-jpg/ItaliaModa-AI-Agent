@@ -8,6 +8,13 @@ dotenv.config();
 
 import { setGlobalDispatcher, Agent } from "undici";
 
+// Dev-only debug logger — silenced in production to keep logs clean.
+// Replaces noisy debug logging without losing console.error / .warn.
+const DEBUG_LOG = process.env.NODE_ENV !== "production";
+const dlog: (...args: any[]) => void = DEBUG_LOG
+  ? console.log.bind(console)
+  : () => {};
+
 // Configure global fetch dispatcher with longer timeouts to prevent HeadersTimeoutError
 // when analyzing multiple high-resolution images or during heavy generation tasks.
 setGlobalDispatcher(new Agent({
@@ -362,7 +369,7 @@ async function fetchPrestashop(
   const qParams = new URLSearchParams({ ...actualQueryParams, ws_key: cleanKey });
   const standardUrl = `${cleanUrl}/api/${apiPath}?${qParams.toString()}`;
 
-  console.log(`[PrestaShop API] Trying standard URL: ${method} ${cleanUrl}/api/${apiPath}`);
+  dlog(`[PrestaShop API] Trying standard URL: ${method} ${cleanUrl}/api/${apiPath}`);
 
   const headers: Record<string, string> = {
     "Authorization": authHeader,
@@ -412,7 +419,7 @@ async function fetchPrestashop(
     });
 
     const fallbackUrl = `${cleanUrl}/webservice/dispatcher.php?${fallbackParams.toString()}`;
-    console.log(`[PrestaShop API] Fetching dispatcher: ${method} ${cleanUrl}/webservice/dispatcher.php?url=${apiPath}`);
+    dlog(`[PrestaShop API] Fetching dispatcher: ${method} ${cleanUrl}/webservice/dispatcher.php?url=${apiPath}`);
 
     const fallbackHeaders: Record<string, string> = {
       "Authorization": authHeader,
@@ -587,7 +594,7 @@ async function findCreatedProductFallback(
   try {
     // 1. Try to search by SKU (reference)
     if (sku && sku.trim()) {
-      console.log(`[Recovery] Searching existing products by reference=[${sku.trim()}]`);
+      dlog(`[Recovery] Searching existing products by reference=[${sku.trim()}]`);
       const { response, text } = await fetchPrestashop(
         shopUrl,
         apiKey,
@@ -607,7 +614,7 @@ async function findCreatedProductFallback(
     }
 
     // 2. Fetch last 5 products to match by Title or Reference
-    console.log(`[Recovery] Scanning last 5 created products for title: "${title}"`);
+    dlog(`[Recovery] Scanning last 5 created products for title: "${title}"`);
     const { response: latestRes, text: latestText } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -628,7 +635,7 @@ async function findCreatedProductFallback(
           const matchTitle = title && title.trim() && pName.toLowerCase().includes(title.trim().toLowerCase());
           
           if (matchSku || matchTitle) {
-            console.log(`[Recovery] Autodetected product ID ${p.id} with title "${pName}" and reference "${pRef}"`);
+            dlog(`[Recovery] Autodetected product ID ${p.id} with title "${pName}" and reference "${pRef}"`);
             return parseInt(p.id, 10);
           }
         }
@@ -671,7 +678,7 @@ async function findCreatedCombinationFallback(
               const optValuesList = Array.isArray(optValuesRaw) ? optValuesRaw : [optValuesRaw];
               const itemOptValueIds = optValuesList.map((ov: any) => extractSafePrestashopId(ov.id)).filter(id => id > 0);
               if (itemOptValueIds.length === optionValueIds.length && optionValueIds.every(id => itemOptValueIds.includes(id))) {
-                console.log(`[RECOVERY] Found matching combination via attribute IDs: ${JSON.stringify(optionValueIds)} with ID: ${item.id}`);
+                dlog(`[RECOVERY] Found matching combination via attribute IDs: ${JSON.stringify(optionValueIds)} with ID: ${item.id}`);
                 return parseInt(item.id, 10);
               }
             }
@@ -688,7 +695,7 @@ async function findCreatedCombinationFallback(
 // Helper to find the correct tax rules group for PL Standard Rate (23%)
 async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<number | null> {
   try {
-    console.log(`[Tax Rules Group] Fetching tax rule groups...`);
+    dlog(`[Tax Rules Group] Fetching tax rule groups...`);
     const { response, text } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -705,7 +712,7 @@ async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<numbe
         for (const g of groups) {
           const gName = g.name ? g.name.toString().toLowerCase() : "";
           if (gName.includes("pl standard rate") && gName.includes("23")) {
-            console.log(`[Tax Rules Group] Found precise Polish 23% standard rate group: ID ${g.id} ("${g.name}")`);
+            dlog(`[Tax Rules Group] Found precise Polish 23% standard rate group: ID ${g.id} ("${g.name}")`);
             return parseInt(g.id, 10);
           }
         }
@@ -717,7 +724,7 @@ async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<numbe
             (gName.includes("standard") || gName.includes("stawka") || gName.includes("pl")) && 
             gName.includes("23")
           ) {
-            console.log(`[Tax Rules Group] Found matched Polish standard rate group: ID ${g.id} ("${g.name}")`);
+            dlog(`[Tax Rules Group] Found matched Polish standard rate group: ID ${g.id} ("${g.name}")`);
             return parseInt(g.id, 10);
           }
         }
@@ -726,7 +733,7 @@ async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<numbe
         for (const g of groups) {
           const gName = g.name ? g.name.toString().toLowerCase() : "";
           if (gName.includes("23")) {
-            console.log(`[Tax Rules Group] Found group mentioning 23: ID ${g.id} ("${g.name}")`);
+            dlog(`[Tax Rules Group] Found group mentioning 23: ID ${g.id} ("${g.name}")`);
             return parseInt(g.id, 10);
           }
         }
@@ -735,7 +742,7 @@ async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<numbe
         for (const g of groups) {
           const gName = g.name ? g.name.toString().toLowerCase() : "";
           if (gName.includes("standard rate")) {
-            console.log(`[Tax Rules Group] Found standard rate group: ID ${g.id} ("${g.name}")`);
+            dlog(`[Tax Rules Group] Found standard rate group: ID ${g.id} ("${g.name}")`);
             return parseInt(g.id, 10);
           }
         }
@@ -744,7 +751,7 @@ async function findTaxRulesGroup(shopUrl: string, apiKey: string): Promise<numbe
         for (const g of groups) {
           const gName = g.name ? g.name.toString().toLowerCase() : "";
           if (gName.includes("pl standard rate")) {
-            console.log(`[Tax Rules Group] Found PL standard rate group: ID ${g.id} ("${g.name}")`);
+            dlog(`[Tax Rules Group] Found PL standard rate group: ID ${g.id} ("${g.name}")`);
             return parseInt(g.id, 10);
           }
         }
@@ -1060,11 +1067,11 @@ async function getOrCreateAttributeValue(
 
         if (isColorGroup) {
           if (bestId !== null) {
-            console.log(`[Color Restriction] Match found: mapped "${valueName}" to closest existing PrestaShop color attribute with ID ${bestId}`);
+            dlog(`[Color Restriction] Match found: mapped "${valueName}" to closest existing PrestaShop color attribute with ID ${bestId}`);
             return bestId;
           }
           if (fallbackId !== null) {
-            console.log(`[Color Restriction] No matching color found for "${valueName}". Falling back to first available standard color ID ${fallbackId}`);
+            dlog(`[Color Restriction] No matching color found for "${valueName}". Falling back to first available standard color ID ${fallbackId}`);
             return fallbackId;
           }
         }
@@ -1232,7 +1239,7 @@ async function getProductImageIds(shopUrl: string, apiKey: string, productId: nu
     
     const matches = [...text.matchAll(/<image>\s*<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>\s*<\/image>/gi)];
     const ids = matches.map(m => parseInt(m[1], 10));
-    console.log(`[getProductImageIds] Found image IDs for product ${productId}:`, ids);
+    dlog(`[getProductImageIds] Found image IDs for product ${productId}:`, ids);
     return ids;
   } catch (err) {
     console.error("Error fetching product image IDs:", err);
@@ -1249,7 +1256,7 @@ async function linkImagesToCombination(
 ): Promise<boolean> {
   if (imageIds.length === 0) return true;
   try {
-    console.log(`[Combination Image Linker] Linking images ${imageIds.join(", ")} to combination ID: ${combinationId}`);
+    dlog(`[Combination Image Linker] Linking images ${imageIds.join(", ")} to combination ID: ${combinationId}`);
     const { response: getRes, text: getXml } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -1292,7 +1299,7 @@ async function linkImagesToCombination(
     );
 
     if (putRes.ok || isBuggyPrestashopModuleWarning(putXml)) {
-      console.log(`[Combination Image Linker] Successfully linked images to combination ${combinationId}`);
+      dlog(`[Combination Image Linker] Successfully linked images to combination ${combinationId}`);
       return true;
     } else {
       const errMsg = extractPrestashopErrorMessage(putXml);
@@ -1324,7 +1331,7 @@ async function createProductCombinations(
     const colorGroupId = await getOrCreateAttributeGroup(shopUrl, apiKey, langId, colorGroupName, "color");
     const sizeGroupId = await getOrCreateAttributeGroup(shopUrl, apiKey, langId, sizeGroupName, "select");
 
-    console.log(`Attribute Groups status: Color = ${colorGroupId}, Size = ${sizeGroupId}`);
+    dlog(`Attribute Groups status: Color = ${colorGroupId}, Size = ${sizeGroupId}`);
 
     for (let i = 0; i < variants.length; i++) {
       const currentVar = variants[i];
@@ -1332,7 +1339,7 @@ async function createProductCombinations(
       const varQty = (typeof currentVar === "object" && currentVar.quantity !== undefined) ? currentVar.quantity : quantity;
 
       const parsed = parseVariantString(varStr);
-      console.log(`Processing variant:`, parsed, `with stock quantity: ${varQty}`);
+      dlog(`Processing variant:`, parsed, `with stock quantity: ${varQty}`);
 
       const optionValueIds: number[] = [];
 
@@ -1370,7 +1377,7 @@ async function createProductCombinations(
   </combination>
 </prestashop>`;
 
-      console.log(`Publishing combination ${i + 1} with attributes: ${JSON.stringify(optionValueIds)}`);
+      dlog(`Publishing combination ${i + 1} with attributes: ${JSON.stringify(optionValueIds)}`);
       const { response: combRes, text: combText } = await fetchPrestashop(
         shopUrl,
         apiKey,
@@ -1385,7 +1392,7 @@ async function createProductCombinations(
       if (idMatch && idMatch[1]) {
         const combinationId = parseInt(idMatch[1], 10);
         if (!combRes.ok) {
-          console.log(`[Combination Warning Bypass] Combination creation returned status ${combRes.status} but successfully extracted combination ID ${combinationId} from response.`);
+          dlog(`[Combination Warning Bypass] Combination creation returned status ${combRes.status} but successfully extracted combination ID ${combinationId} from response.`);
         }
         combinationIds.push(combinationId);
         createdCombinations.push({ id: combinationId, quantity: varQty });
@@ -1394,7 +1401,7 @@ async function createProductCombinations(
         console.warn(`Combination creation returned status ${combRes.status}. Checking recovery fallback...`);
         const recoveredId = await findCreatedCombinationFallback(shopUrl, apiKey, productId, "", optionValueIds);
         if (recoveredId) {
-          console.log(`[RECOVERY] Combination with optionValueIds "${JSON.stringify(optionValueIds)}" was found on PrestaShop with ID: ${recoveredId}`);
+          dlog(`[RECOVERY] Combination with optionValueIds "${JSON.stringify(optionValueIds)}" was found on PrestaShop with ID: ${recoveredId}`);
           combinationIds.push(recoveredId);
           createdCombinations.push({ id: recoveredId, quantity: varQty });
           combinationInfoList.push({ id: recoveredId, color: parsed.color, selectedImageIndexes: (typeof currentVar === "object" ? (currentVar as any).selectedImageIndexes : undefined) });
@@ -1428,7 +1435,7 @@ async function createProductCombinations(
               });
 
               if (!matchedStock) {
-                console.log(`[Combination Stock Fallback] Stock record for combId=${combId} not found in product list. Querying directly by attribute...`);
+                dlog(`[Combination Stock Fallback] Stock record for combId=${combId} not found in product list. Querying directly by attribute...`);
                 try {
                   const { response: directRes, text: directText } = await fetchPrestashop(
                     shopUrl,
@@ -1472,7 +1479,7 @@ async function createProductCombinations(
   </stock_available>
 </prestashop>`;
 
-                console.log(`[Combination Stock] Setting stock for combId=${combId} (stockId=${stockId}, shop=${isShop}) to quantity=${varQty}`);
+                dlog(`[Combination Stock] Setting stock for combId=${combId} (stockId=${stockId}, shop=${isShop}) to quantity=${varQty}`);
                 const { response: putStockRes, text: putStockText } = await fetchPrestashop(
                   shopUrl,
                   apiKey,
@@ -1485,9 +1492,9 @@ async function createProductCombinations(
 
                 if (putStockRes.ok || isBuggyPrestashopModuleWarning(putStockText)) {
                   if (!putStockRes.ok) {
-                    console.log(`[Combination Stock Bypass] Stock update returned status ${putStockRes.status} but bypassed custom module warning. Treating as SUCCESS since DB update is completed.`);
+                    dlog(`[Combination Stock Bypass] Stock update returned status ${putStockRes.status} but bypassed custom module warning. Treating as SUCCESS since DB update is completed.`);
                   } else {
-                    console.log(`[Combination Stock] Successfully updated stock for combId=${combId} to quantity=${varQty}`);
+                    dlog(`[Combination Stock] Successfully updated stock for combId=${combId} to quantity=${varQty}`);
                   }
                 } else {
                   console.warn(`[Combination Stock Error] Failed to update stock for combId=${combId}: HTTP ${putStockRes.status} - ${putStockText}`);
@@ -1521,7 +1528,7 @@ async function createProductCombinations(
   </stock_available>
 </prestashop>`;
 
-              console.log(`[Combination Stock] Setting overall product stock (combId=0, stockId=${stockId}) to sum quantity=${totalQty}`);
+              dlog(`[Combination Stock] Setting overall product stock (combId=0, stockId=${stockId}) to sum quantity=${totalQty}`);
               const { response: putOverallRes, text: putOverallText } = await fetchPrestashop(
                 shopUrl,
                 apiKey,
@@ -1532,7 +1539,7 @@ async function createProductCombinations(
                 true
               );
               if (putOverallRes.ok || isBuggyPrestashopModuleWarning(putOverallText)) {
-                console.log(`[Combination Stock] Successfully synchronized overall master product stock to ${totalQty}`);
+                dlog(`[Combination Stock] Successfully synchronized overall master product stock to ${totalQty}`);
               } else {
                 console.warn(`[Combination Stock Warning] Failed updating overall master product stock: HTTP ${putOverallRes.status} - ${putOverallText}`);
               }
@@ -1593,7 +1600,7 @@ async function updateProductToCombinations(
   defaultCombinationId: number
 ): Promise<boolean> {
   try {
-    console.log(`[Combinations Linker] Fetching full product XML for ID: ${productId}`);
+    dlog(`[Combinations Linker] Fetching full product XML for ID: ${productId}`);
     const { response: getRes, text: getXml } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -1631,7 +1638,7 @@ async function updateProductToCombinations(
     // 3. Clean any read-only fields/associations that would trigger PUT errors
     updatedXml = cleanProductXmlForPut(updatedXml);
 
-    console.log(`[Combinations Linker] Sending PUT update for product ID: ${productId} setting default combination: ${defaultCombinationId}`);
+    dlog(`[Combinations Linker] Sending PUT update for product ID: ${productId} setting default combination: ${defaultCombinationId}`);
     const { response: putRes, text: putXml } = await fetchPrestashop(
       shopUrl,
       apiKey,
@@ -1644,9 +1651,9 @@ async function updateProductToCombinations(
 
     if (putRes.ok || isBuggyPrestashopModuleWarning(putXml)) {
       if (isBuggyPrestashopModuleWarning(putXml)) {
-        console.log(`[Combinations Linker] Primary PUT returned warning but it was from buggy third-party module. Treating update as SUCCESS since DB update completes before hooks execute!`);
+        dlog(`[Combinations Linker] Primary PUT returned warning but it was from buggy third-party module. Treating update as SUCCESS since DB update completes before hooks execute!`);
       } else {
-        console.log(`[Combinations Linker] Successfully updated product ${productId} type to combinations with default combination: ${defaultCombinationId}`);
+        dlog(`[Combinations Linker] Successfully updated product ${productId} type to combinations with default combination: ${defaultCombinationId}`);
       }
       return true;
     } else {
@@ -1686,9 +1693,9 @@ async function updateProductToCombinations(
 
       if (miniRes.ok || isBuggyPrestashopModuleWarning(miniXml)) {
         if (isBuggyPrestashopModuleWarning(miniXml)) {
-          console.log(`[Combinations Linker] Minimized fallback PUT returned warning but it was from buggy third-party module. Treating fallback as SUCCESS since DB update is completed!`);
+          dlog(`[Combinations Linker] Minimized fallback PUT returned warning but it was from buggy third-party module. Treating fallback as SUCCESS since DB update is completed!`);
         } else {
-          console.log(`[Combinations Linker] Minimized fallback PUT succeeded! Product ID ${productId} successfully linked to combinations.`);
+          dlog(`[Combinations Linker] Minimized fallback PUT succeeded! Product ID ${productId} successfully linked to combinations.`);
         }
         return true;
       } else {
@@ -1712,7 +1719,7 @@ app.post("/api/prestashop/test", async (req, res) => {
       return;
     }
 
-    console.log(`Testing PrestaShop connection`);
+    dlog(`Testing PrestaShop connection`);
     const { response, text } = await fetchPrestashop(
       config.shopUrl,
       config.apiKey,
@@ -1749,7 +1756,7 @@ app.post("/api/prestashop/categories", async (req, res) => {
       return;
     }
 
-    console.log(`Retrieving categories from PrestaShop`);
+    dlog(`Retrieving categories from PrestaShop`);
     const { response, text } = await fetchPrestashop(
       config.shopUrl,
       config.apiKey,
@@ -1828,7 +1835,7 @@ app.post("/api/prestashop/add-product", async (req, res) => {
     const featureAssociations: { id: number; id_feature_value: number }[] = [];
 
     if (product.sklad && product.sklad.trim()) {
-      console.log(`Setting Skład feature parameter`);
+      dlog(`Setting Skład feature parameter`);
       try {
         const nameLabel = langId === 1 ? "Skład" : "Composition";
         const featId = await getOrCreateFeature(config.shopUrl, config.apiKey, langId, nameLabel);
@@ -1844,7 +1851,7 @@ app.post("/api/prestashop/add-product", async (req, res) => {
     }
 
     if (product.modelka && product.modelka.trim()) {
-      console.log(`Setting Modelka feature parameter`);
+      dlog(`Setting Modelka feature parameter`);
       try {
         const nameLabel = langId === 1 ? "Modelka" : "Model specifications";
         const featId = await getOrCreateFeature(config.shopUrl, config.apiKey, langId, nameLabel);
@@ -1900,7 +1907,7 @@ ${categoriesXml}
   </product>
 </prestashop>`;
 
-    console.log(`Posting XML payload to create product`);
+    dlog(`Posting XML payload to create product`);
     let { response, text: responseText } = await fetchPrestashop(
       config.shopUrl,
       config.apiKey,
@@ -1921,9 +1928,9 @@ ${categoriesXml}
       createdProductId = await findCreatedProductFallback(config.shopUrl, config.apiKey, product.sku, product.title);
       
       if (createdProductId) {
-        console.log(`[Self-Healing Recovery] Product was successfully recovered on the first attempt with ID ${createdProductId}! Skipping simplified XML retry to prevent duplicate creations.`);
+        dlog(`[Self-Healing Recovery] Product was successfully recovered on the first attempt with ID ${createdProductId}! Skipping simplified XML retry to prevent duplicate creations.`);
       } else {
-        console.log(`Product was not found. Proceeding with simplified fallback XML retry...`);
+        dlog(`Product was not found. Proceeding with simplified fallback XML retry...`);
         const retryXmlBody = `<?xml version="1.0" encoding="UTF-8"?>
 <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
   <product>
@@ -1963,7 +1970,7 @@ ${categoriesXml}
         );
 
         if (retryRes.response.ok) {
-          console.log(`[Self-Healing Success] Simplified XML retry worked successfully!`);
+          dlog(`[Self-Healing Success] Simplified XML retry worked successfully!`);
           response = retryRes.response;
           responseText = retryRes.text;
         } else {
@@ -1974,7 +1981,7 @@ ${categoriesXml}
           createdProductId = await findCreatedProductFallback(config.shopUrl, config.apiKey, product.sku, product.title);
           
           if (createdProductId) {
-            console.log(`[RECOVERY] Product was successfully recovered! Found ID ${createdProductId} on PrestaShop despite the API warning/error output. Proceeding smoothly.`);
+            dlog(`[RECOVERY] Product was successfully recovered! Found ID ${createdProductId} on PrestaShop despite the API warning/error output. Proceeding smoothly.`);
           } else {
             // If recovery truly failed, then throw the error
             console.error(`PrestaShop product creation failed and fallback recovery could not find any matching product. API response text:`, responseText);
@@ -1993,7 +2000,7 @@ ${categoriesXml}
         const locMatch = locationHeader.match(/\/products\/(\d+)/i) || locationHeader.match(/\/(\d+)$/);
         if (locMatch && locMatch[1]) {
           createdProductId = parseInt(locMatch[1], 10);
-          console.log(`Successfully parsed product ID from Location header: ${createdProductId}`);
+          dlog(`Successfully parsed product ID from Location header: ${createdProductId}`);
         }
       }
     }
@@ -2003,7 +2010,7 @@ ${categoriesXml}
       const robustMatch = responseText.match(/<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>/i);
       if (robustMatch && robustMatch[1]) {
         createdProductId = parseInt(robustMatch[1], 10);
-        console.log(`Successfully parsed product ID from flexible XML regex: ${createdProductId}`);
+        dlog(`Successfully parsed product ID from flexible XML regex: ${createdProductId}`);
       }
     }
 
@@ -2017,14 +2024,14 @@ ${categoriesXml}
       throw new Error(`Product was successfully created (HTTP ${response.status}), but the system could not extract the new product ID from the response. Response snippet: "${cleanSnippet}". Check if your API key has enough access permissions for products.`);
     }
 
-    console.log(`Product created with ID: ${createdProductId}`);
+    dlog(`Product created with ID: ${createdProductId}`);
 
     // Create combinations if combinations are present
     const resolvedQty = product.quantity !== undefined ? parseInt(product.quantity, 10) : 100;
     let combinationInfo: { id: number; color: string | null; selectedImageIndexes?: number[] }[] = [];
 
     if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-      console.log(`Generating combinations for product ID: ${createdProductId} with stock quantity: ${resolvedQty}`);
+      dlog(`Generating combinations for product ID: ${createdProductId} with stock quantity: ${resolvedQty}`);
       combinationInfo = await createProductCombinations(
         config.shopUrl,
         config.apiKey,
@@ -2035,7 +2042,7 @@ ${categoriesXml}
         resolvedQty
       );
       if (combinationInfo.length > 0) {
-        console.log(`Setting default combination reference for product ID: ${createdProductId}`);
+        dlog(`Setting default combination reference for product ID: ${createdProductId}`);
         await updateProductToCombinations(
           config.shopUrl,
           config.apiKey,
@@ -2045,7 +2052,7 @@ ${categoriesXml}
       }
     } else {
       // Set main product stock if no combinations are added
-      console.log(`No combinations, setting default product stock to ${resolvedQty} for product ID: ${createdProductId}`);
+      dlog(`No combinations, setting default product stock to ${resolvedQty} for product ID: ${createdProductId}`);
       try {
         const { response: stockRes, text: stockText } = await fetchPrestashop(
           config.shopUrl,
@@ -2112,7 +2119,7 @@ ${categoriesXml}
       : [imageMimeType || 'image/jpeg'];
 
     if (imageList.length > 0) {
-      console.log(`Starting uploads of ${imageList.length} images for product ID: ${createdProductId}`);
+      dlog(`Starting uploads of ${imageList.length} images for product ID: ${createdProductId}`);
       for (let i = 0; i < imageList.length; i++) {
         try {
           const base64Data = imageList[i];
@@ -2150,7 +2157,7 @@ ${categoriesXml}
             Buffer.from(footerText, "utf-8")
           ]);
 
-          console.log(`Uploading image ${i+1}/${imageList.length} (size: ${multipartBody.length} bytes) to product ID: ${createdProductId}`);
+          dlog(`Uploading image ${i+1}/${imageList.length} (size: ${multipartBody.length} bytes) to product ID: ${createdProductId}`);
           
           const { response: imageRes, text: imageResText } = await fetchPrestashop(
             config.shopUrl,
@@ -2168,9 +2175,9 @@ ${categoriesXml}
             imageUploaded = true;
             imagesUploadedCount++;
             if (isWarning) {
-              console.log(`Image ${i+1} uploaded (bypassed custom module warning, image successfully stored in PrestaShop).`);
+              dlog(`Image ${i+1} uploaded (bypassed custom module warning, image successfully stored in PrestaShop).`);
             } else {
-              console.log(`Image ${i+1} uploaded successfully.`);
+              dlog(`Image ${i+1} uploaded successfully.`);
             }
           } else {
             const xmlErrMsg = extractPrestashopErrorMessage(imageResText);
@@ -2187,13 +2194,13 @@ ${categoriesXml}
     // Step 3: Link matching images to each combination
     if (combinationInfo.length > 0 && imageUploaded) {
       try {
-        console.log(`[Combination Image Linker] Starting image linking process for product ID: ${createdProductId}`);
+        dlog(`[Combination Image Linker] Starting image linking process for product ID: ${createdProductId}`);
         const psImageIds = await getProductImageIds(config.shopUrl, config.apiKey, createdProductId);
         
         if (psImageIds.length > 0) {
           // Sort image IDs in ascending numerical order, which corresponds to sequential order of uploading!
           psImageIds.sort((a, b) => a - b);
-          console.log(`[Combination Image Linker] Sorted PrestaShop Image IDs: ${psImageIds.join(", ")}`);
+          dlog(`[Combination Image Linker] Sorted PrestaShop Image IDs: ${psImageIds.join(", ")}`);
 
           for (const combInfo of combinationInfo) {
             const matchedImageIds: number[] = [];
@@ -2201,7 +2208,7 @@ ${categoriesXml}
             // Prioritize automatic matching based on dominant color and filenames.
             // If explicit selectedImageIndexes are defined by the client, use only those.
             if (combInfo.selectedImageIndexes !== undefined && Array.isArray(combInfo.selectedImageIndexes)) {
-              console.log(`[Combination Image Linker] Using explicit selection for combination ID ${combInfo.id} (indices: ${combInfo.selectedImageIndexes.join(", ")})`);
+              dlog(`[Combination Image Linker] Using explicit selection for combination ID ${combInfo.id} (indices: ${combInfo.selectedImageIndexes.join(", ")})`);
               for (const imgIdx of combInfo.selectedImageIndexes) {
                 if (imgIdx >= 0 && imgIdx < psImageIds.length) {
                   matchedImageIds.push(psImageIds[imgIdx]);
@@ -2209,7 +2216,7 @@ ${categoriesXml}
               }
             } else {
               // Fallback to automatic matching (prioritizes dominant color and file names)
-              console.log(`[Combination Image Linker] Using automatic matching for combination ID ${combInfo.id} (Color: ${combInfo.color || "none"})`);
+              dlog(`[Combination Image Linker] Using automatic matching for combination ID ${combInfo.id} (Color: ${combInfo.color || "none"})`);
               for (let i = 0; i < psImageIds.length; i++) {
                 const imageId = psImageIds[i];
                 const imageColorGroup = imagesColors && imagesColors[i] ? imagesColors[i] : "other";
@@ -2230,7 +2237,7 @@ ${categoriesXml}
               ? matchedImageIds 
               : psImageIds;
             
-            console.log(`[Combination Image Linker] Combination ID ${combInfo.id} (Color: ${combInfo.color}) matched images: ${imagesToLink.join(", ")}`);
+            dlog(`[Combination Image Linker] Combination ID ${combInfo.id} (Color: ${combInfo.color}) matched images: ${imagesToLink.join(", ")}`);
             await linkImagesToCombination(
               config.shopUrl,
               config.apiKey,
@@ -2273,7 +2280,7 @@ app.post("/api/prestashop/update-product", async (req, res) => {
     const langId = config.languageId || 1;
     const cleanPrice = parseFloat(product.price) || 0;
     
-    console.log(`[Product Editor] Fetching current XML for PrestaShop product: ${productId}`);
+    dlog(`[Product Editor] Fetching current XML for PrestaShop product: ${productId}`);
     const { response: getRes, text: getXml } = await fetchPrestashop(
       config.shopUrl,
       config.apiKey,
@@ -2377,7 +2384,7 @@ app.post("/api/prestashop/update-product", async (req, res) => {
     // Clean for PUT request (strip read-only)
     updatedXml = cleanProductXmlForPut(updatedXml);
 
-    console.log(`[Product Editor] Sending PUT update for product ID: ${productId}`);
+    dlog(`[Product Editor] Sending PUT update for product ID: ${productId}`);
     const { response: putRes, text: putXml } = await fetchPrestashop(
       config.shopUrl,
       config.apiKey,
@@ -2391,9 +2398,9 @@ app.post("/api/prestashop/update-product", async (req, res) => {
     const isWarning = isBuggyPrestashopModuleWarning(putXml);
     if (putRes.ok || isWarning) {
       if (isWarning) {
-        console.log(`[Product Editor] Update returned custom module warning but DB update is completed before hooks execute. Treating as SUCCESS!`);
+        dlog(`[Product Editor] Update returned custom module warning but DB update is completed before hooks execute. Treating as SUCCESS!`);
       } else {
-        console.log(`[Product Editor] Success PUT update for product ID: ${productId}`);
+        dlog(`[Product Editor] Success PUT update for product ID: ${productId}`);
       }
       res.json({ success: true, message: `Product successfully updated in PrestaShop` });
     } else {
@@ -2425,7 +2432,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port http://localhost:${PORT}`);
+    dlog(`Server running on port http://localhost:${PORT}`);
   });
 }
 

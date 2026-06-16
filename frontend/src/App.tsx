@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { 
   Camera, 
   Upload, 
@@ -26,6 +26,41 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ProductAnalysis, PrestaShopConfig, PrestaShopCategory, HistoryItem } from "./types";
+
+// Stable animation prop constants (avoid re-creating object refs on every render).
+const COLLAPSIBLE_INITIAL = { opacity: 0, height: 0 };
+const COLLAPSIBLE_ANIMATE = { opacity: 1, height: "auto" as const };
+const COLLAPSIBLE_EXIT = { opacity: 0, height: 0 };
+const MODAL_INITIAL = { scale: 0.95, opacity: 0 };
+const MODAL_ANIMATE = { scale: 1, opacity: 1 };
+const MODAL_EXIT = { scale: 0.95, opacity: 0 };
+
+// Shared className helpers (replace nested ternaries inline in JSX).
+const primaryActionButtonClass = (disabled: boolean, busy: boolean): string => {
+  if (disabled) {
+    return "bg-[#f1f2f4] text-[#8c9196] border border-[#e1e3e5] cursor-not-allowed";
+  }
+  if (busy) {
+    return "bg-[#f1f8f5] text-[#008060] border border-[#008060]/30 animate-pulse cursor-wait";
+  }
+  return "bg-[#008060] hover:bg-[#006e52] text-white font-bold shadow-sm active:bg-[#005e46]";
+};
+
+const fieldGenerateButtonClass = (busy: boolean, noImage: boolean): string => {
+  if (busy) {
+    return "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse";
+  }
+  if (noImage) {
+    return "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed";
+  }
+  return "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm";
+};
+
+const dropzoneClass = (hasImage: boolean, dragActive: boolean): string => {
+  if (hasImage) return "bg-white border-[#e1e3e5]";
+  if (dragActive) return "bg-[#f1f8f5] border-[#008060] border-dashed";
+  return "bg-[#fafbfb] hover:bg-white border-[#babfc3] hover:border-[#008060] border-dashed";
+};
 
 const detectDominantColorSilent = (base64: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -387,7 +422,7 @@ export default function App() {
       try {
         return JSON.parse(saved);
       } catch (e) {
-        // Fallback
+        console.error("Failed to parse saved presta_config from localStorage:", e);
       }
     }
     return {
@@ -509,6 +544,14 @@ export default function App() {
   const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(false);
   const [categoryLoadError, setCategoryLoadError] = useState<string | null>(null);
 
+  // Memoized list of categories that the user has actually selected.
+  // Computed inline in JSX would run filter on every render — extracted here
+  // so it only recomputes when its inputs change.
+  const selectedPsCategories = useMemo(
+    () => psCategories.filter(c => selectedCategories.includes(c.id)),
+    [psCategories, selectedCategories]
+  );
+
   // --- Sync History State ---
   const [history, setHistory] = useState<HistoryItem[]>(() => {
     const saved = localStorage.getItem("sync_history");
@@ -542,12 +585,35 @@ export default function App() {
     localStorage.setItem("sync_history", JSON.stringify(history));
   }, [history]);
 
+  // --- PrestaShop Actions API ---
+  const fetchCategories = useCallback(async () => {
+    setIsLoadingCategories(true);
+    setCategoryLoadError(null);
+    try {
+      const response = await fetch("/api/prestashop/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config: psConfig }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setPsCategories(data.categories || []);
+      } else {
+        setCategoryLoadError(data.error || "Не удалось загрузить категории.");
+      }
+    } catch (err: any) {
+      setCategoryLoadError(err.message || "Ошибка подключения к прокси-серверу.");
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, [psConfig]);
+
   // Load Categories on active configuration match
   useEffect(() => {
     if (psConfig.apiKey && psConfig.shopUrl) {
       fetchCategories();
     }
-  }, [psConfig.apiKey, psConfig.shopUrl]);
+  }, [psConfig.apiKey, psConfig.shopUrl, fetchCategories]);
 
   // Synchronously select "Wszystkie produkty" and "Nowa kolekcja" as default whenever categories load or are initialized
   useEffect(() => {
@@ -825,29 +891,6 @@ export default function App() {
     fileInputRef.current?.click();
   };
 
-  // --- PrestaShop Actions API ---
-  const fetchCategories = async () => {
-    setIsLoadingCategories(true);
-    setCategoryLoadError(null);
-    try {
-      const response = await fetch("/api/prestashop/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config: psConfig }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setPsCategories(data.categories || []);
-      } else {
-        setCategoryLoadError(data.error || "Не удалось загрузить категории.");
-      }
-    } catch (err: any) {
-      setCategoryLoadError(err.message || "Ошибка подключения к прокси-серверу.");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
-
   const handleTestConnection = async () => {
     setIsTestingConfig(true);
     setConfigTestResult(null);
@@ -991,7 +1034,15 @@ export default function App() {
         ? sortedImages.map(img => img.mimeType) 
         : [imageMime];
 
-      const currentValue = fieldName === "title" ? title : fieldName === "description_short" ? descShort : descLong;
+      const currentValue =
+        fieldName === "title"
+          ? title
+          : fieldName === "description_short"
+            ? descShort
+            : descLong;
+
+      // Note: kept as a two-step lookup; helper would obscure the simple
+      // 3-key mapping. If more fields are added later, refactor to a Record.
 
       const response = await fetch("/api/gemini/generate-field", {
         method: "POST",
@@ -1052,12 +1103,15 @@ export default function App() {
       : sortedImages;
 
     // Extract raw base64 arrays for multiple files upload
-    const imagesVal = finalImagesToUpload.length > 0 
-      ? finalImagesToUpload.map(img => img.base64.split(",")[1]) 
-      : (selectedImage ? [selectedImage.split(",")[1]] : []);
-    const mimesVal = finalImagesToUpload.length > 0 
-      ? finalImagesToUpload.map(img => img.mimeType) 
-      : (imageMime ? [imageMime] : []);
+    let imagesVal: string[];
+    let mimesVal: string[];
+    if (finalImagesToUpload.length > 0) {
+      imagesVal = finalImagesToUpload.map(img => img.base64.split(",")[1]);
+      mimesVal = finalImagesToUpload.map(img => img.mimeType);
+    } else {
+      imagesVal = selectedImage ? [selectedImage.split(",")[1]] : [];
+      mimesVal = imageMime ? [imageMime] : [];
+    }
     const colorsVal = finalImagesToUpload.length > 0
       ? finalImagesToUpload.map(img => img.colorGroup || "other")
       : ["other"];
@@ -1327,9 +1381,9 @@ export default function App() {
       <AnimatePresence>
         {showSettings && (
           <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={COLLAPSIBLE_INITIAL}
+            animate={COLLAPSIBLE_ANIMATE}
+            exit={COLLAPSIBLE_EXIT}
             className="bg-white border-b border-[#e1e3e5] p-6 overflow-hidden shadow-sm"
           >
             <div className="max-w-4xl mx-auto">
@@ -1514,13 +1568,7 @@ export default function App() {
                   onDragOver={handleDrag}
                   onDragLeave={handleDrag}
                   onDrop={handleDrop}
-                  className={`flex-1 rounded-lg flex flex-col justify-center items-center transition-all aspect-square border-2 ${
-                    selectedImage 
-                      ? "bg-white border-[#e1e3e5]" 
-                      : dragActive 
-                      ? "bg-[#f1f8f5] border-[#008060] border-dashed" 
-                      : "bg-[#fafbfb] hover:bg-white border-[#babfc3] hover:border-[#008060] border-dashed"
-                  } relative overflow-hidden`}
+                  className={`flex-1 rounded-lg flex flex-col justify-center items-center transition-all aspect-square border-2 ${dropzoneClass(!!selectedImage, dragActive)} relative overflow-hidden`}
                 >
                   <input 
                     type="file" 
@@ -1719,13 +1767,7 @@ export default function App() {
               <button
                 disabled={!selectedImage || isAnalyzing}
                 onClick={analyzeImage}
-                className={`w-full py-3.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
-                  !selectedImage 
-                    ? "bg-[#f1f2f4] text-[#8c9196] border border-[#e1e3e5] cursor-not-allowed" 
-                    : isAnalyzing 
-                    ? "bg-[#f1f8f5] text-[#008060] border border-[#008060]/30 animate-pulse cursor-wait" 
-                    : "bg-[#008060] hover:bg-[#006e52] text-white font-bold shadow-sm active:bg-[#005e46]"
-                }`}
+                className={`w-full py-3.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${primaryActionButtonClass(!selectedImage, isAnalyzing)}`}
               >
                 {isAnalyzing ? (
                   <>
@@ -1776,13 +1818,7 @@ export default function App() {
                   <button
                     disabled={isGeneratingField.title || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("title"); }}
-                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
-                      isGeneratingField.title
-                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
-                        : !selectedImage
-                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
-                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
-                    }`}
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${fieldGenerateButtonClass(isGeneratingField.title, !selectedImage)}`}
                   >
                     {isGeneratingField.title ? (
                       <>
@@ -1951,7 +1987,7 @@ export default function App() {
                     <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto p-1 bg-white rounded-lg border border-[#e1e3e5] custom-scrollbar">
                       {suggestedVariants.map((v, i) => (
                         <div 
-                          key={i} 
+                          key={`${v.name || "variant"}-${i}`} 
                           className="flex flex-col p-2.5 rounded-lg bg-[#f9fafb] border border-[#e1e3e5] hover:border-[#babfc3] transition-all text-xs gap-2"
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -2064,13 +2100,7 @@ export default function App() {
                   <button
                     disabled={isGeneratingField.description_short || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("description_short"); }}
-                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
-                      isGeneratingField.description_short
-                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
-                        : !selectedImage
-                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
-                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
-                    }`}
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${fieldGenerateButtonClass(isGeneratingField.description_short, !selectedImage)}`}
                   >
                     {isGeneratingField.description_short ? (
                       <>
@@ -2107,13 +2137,7 @@ export default function App() {
                   <button
                     disabled={isGeneratingField.description || !selectedImage}
                     onClick={(e) => { e.preventDefault(); handleGenerateFieldWithAI("description"); }}
-                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${
-                      isGeneratingField.description
-                        ? "bg-[#f1f8f5] text-[#008060] border-[#008060]/30 animate-pulse"
-                        : !selectedImage
-                        ? "bg-[#f1f2f4] text-[#8c9196] border-[#e1e3e5] cursor-not-allowed"
-                        : "bg-white hover:bg-[#f1f8f5] text-[#008060] border-[#babfc3] hover:border-[#008060]/30 cursor-pointer shadow-sm"
-                    }`}
+                    className={`text-[10px] flex items-center gap-1 px-2 py-0.5 rounded font-semibold border transition-all ${fieldGenerateButtonClass(isGeneratingField.description, !selectedImage)}`}
                   >
                     {isGeneratingField.description ? (
                       <>
@@ -2196,7 +2220,7 @@ export default function App() {
                           onChange={(e) => setDefaultCategoryId(parseInt(e.target.value, 10))}
                           className="w-full bg-white border border-[#babfc3] rounded-lg py-1.5 px-3 text-xs text-[#202223] focus:outline-none focus:border-[#008060] transition-colors"
                         >
-                          {psCategories.filter(c => selectedCategories.includes(c.id)).map((c) => (
+                          {selectedPsCategories.map((c) => (
                             <option key={c.id} value={c.id} className="bg-white text-[#202223] text-xs">
                               {c.name} (ID {c.id})
                             </option>
@@ -2233,13 +2257,7 @@ export default function App() {
               <button
                 disabled={!title || isSyncing}
                 onClick={publishProduct}
-                className={`w-full py-4 rounded-lg text-sm font-semibold flex items-center justify-center space-x-1.5 transition-all ${
-                  !title 
-                    ? "bg-[#f1f2f4] text-[#8c9196] border border-[#e1e3e5] cursor-not-allowed" 
-                    : isSyncing 
-                    ? "bg-[#f1f8f5] text-[#008060] border border-[#008060]/30 animate-pulse cursor-wait font-semibold" 
-                    : "bg-[#008060] hover:bg-[#006e52] text-white font-bold shadow-sm active:bg-[#005e46]"
-                }`}
+                className={`w-full py-4 rounded-lg text-sm font-semibold flex items-center justify-center space-x-1.5 transition-all ${primaryActionButtonClass(!title, isSyncing)}`}
               >
                 {isSyncing ? (
                   <>
@@ -2390,9 +2408,9 @@ export default function App() {
         {editingItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#202223]/60 backdrop-blur-sm">
             <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={MODAL_INITIAL}
+              animate={MODAL_ANIMATE}
+              exit={MODAL_EXIT}
               className="bg-white border border-[#e1e3e5] rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-xl"
             >
               {/* Modal Header */}
