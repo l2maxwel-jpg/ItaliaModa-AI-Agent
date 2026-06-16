@@ -1233,13 +1233,73 @@ function isColorMatch(variantColorName: string, imageColorGroup: string, imageFi
 }
 
 async function getProductImageIds(shopUrl: string, apiKey: string, productId: number): Promise<number[]> {
+  // Strategy A (preferred): query the dedicated /images/products/{id} endpoint,
+  // which returns a flat list of image IDs for the product:
+  //   <image id="123" xlink:href="..."/>  or  <image><id>123</id></image>
+  // Strategy B (fallback): parse the <associations><images>...</images></associations>
+  // block embedded inside the product XML.
+  const extractIds = (xml: string): number[] => {
+    // Try to narrow to the <images> association block when present
+    const blockMatch = xml.match(/<images\b[^>]*>([\s\S]*?)<\/images>/i);
+    const scope = blockMatch ? blockMatch[1] : xml;
+    const ids: number[] = [];
+    const seen = new Set<number>();
+
+    // Pattern 1: <image id="123" .../>  (self-closing with id attribute)
+    for (const m of scope.matchAll(/<image\b[^>]*\bid=["'](\d+)["'][^>]*\/?>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
+    }
+    // Pattern 2: <image ...><id>123</id></image>
+    for (const m of scope.matchAll(/<image\b[^>]*>[\s\S]*?<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>[\s\S]*?<\/image>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
+    }
+    // Pattern 3: <image xlink:href="...">123</image>  (id as element text)
+    for (const m of scope.matchAll(/<image\b[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/image>/gi)) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n) && !seen.has(n)) { ids.push(n); seen.add(n); }
+    }
+    return ids;
+  };
+
   try {
-    const { response, text } = await fetchPrestashop(shopUrl, apiKey, `products/${productId}`, "GET");
-    if (!response.ok) return [];
-    
-    const matches = [...text.matchAll(/<image>\s*<id[^>]*>\s*(?:<!\[CDATA\[)?\s*(\d+)\s*(?:\]\]>)?\s*<\/id>\s*<\/image>/gi)];
-    const ids = matches.map(m => parseInt(m[1], 10));
-    dlog(`[getProductImageIds] Found image IDs for product ${productId}:`, ids);
+    // Strategy A: dedicated images endpoint
+    const { response: imgRes, text: imgText } = await fetchPrestashop(
+      shopUrl,
+      apiKey,
+      `images/products/${productId}`,
+      "GET"
+    );
+    if (imgRes.ok) {
+      const ids = extractIds(imgText);
+      if (ids.length > 0) {
+        dlog(`[getProductImageIds] (via images/products/${productId}) found IDs:`, ids);
+        return ids;
+      }
+      // Empty list might be valid (no images), but fall through to Strategy B
+      // in case the response shape was unexpected.
+      console.warn(`[getProductImageIds] images/products/${productId} returned no IDs. XML head: ${imgText.substring(0, 400).replace(/\n/g, " ")}`);
+    } else {
+      console.warn(`[getProductImageIds] images/products/${productId} HTTP ${imgRes.status}`);
+    }
+
+    // Strategy B: associations from full product
+    const { response, text } = await fetchPrestashop(
+      shopUrl,
+      apiKey,
+      `products/${productId}?display=full`,
+      "GET"
+    );
+    if (!response.ok) {
+      console.warn(`[getProductImageIds] products/${productId}?display=full HTTP ${response.status}`);
+      return [];
+    }
+    const ids = extractIds(text);
+    dlog(`[getProductImageIds] (via products/${productId}?display=full) found IDs:`, ids);
+    if (ids.length === 0) {
+      console.warn(`[getProductImageIds] Could not parse any image IDs. Associations snippet: ${(text.match(/<images\b[^>]*>[\s\S]{0,500}/i) || ["<no images block>"])[0]}`);
+    }
     return ids;
   } catch (err) {
     console.error("Error fetching product image IDs:", err);
