@@ -15,6 +15,52 @@ const dlog: (...args: any[]) => void = DEBUG_LOG
   ? console.log.bind(console)
   : () => {};
 
+// --- Gemini retry wrapper ---
+// Google's generative-language API occasionally returns 503 UNAVAILABLE
+// ("model is currently experiencing high demand") which is transient.
+// We retry with exponential backoff before propagating the error to the client.
+const GEMINI_MAX_ATTEMPTS = 4;
+const GEMINI_BASE_DELAY_MS = 1500;
+
+const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));
+
+const isTransientGeminiError = (err: unknown): boolean => {
+  if (!err) return false;
+  const e = err as { status?: string | number; code?: number; message?: string };
+  if (e.code === 503) return true;
+  if (typeof e.status === "number" && (e.status === 503 || e.status === 429)) return true;
+  if (typeof e.status === "string" && (e.status === "UNAVAILABLE" || e.status === "RESOURCE_EXHAUSTED")) return true;
+  const msg = (e.message || "").toLowerCase();
+  return msg.includes("unavailable")
+    || msg.includes("high demand")
+    || msg.includes("overloaded")
+    || msg.includes("503")
+    || msg.includes("rate limit")
+    || msg.includes("resource exhausted");
+};
+
+async function callGeminiWithRetry<T>(
+  label: string,
+  fn: () => Promise<T>,
+  maxAttempts: number = GEMINI_MAX_ATTEMPTS
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (!isTransientGeminiError(err) || attempt === maxAttempts) {
+        throw err;
+      }
+      const delay = GEMINI_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+      console.warn(`[Gemini retry] ${label}: transient error on attempt ${attempt}/${maxAttempts}, retrying in ${delay}ms. Error: ${(err as { message?: string })?.message || err}`);
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
+}
+
 // Configure global fetch dispatcher with longer timeouts to prevent HeadersTimeoutError
 // when analyzing multiple high-resolution images or during heavy generation tasks.
 setGlobalDispatcher(new Agent({
@@ -211,7 +257,7 @@ Provide:
     };
 
     // Use gemini-3.5-flash with structured JSON response schema
-    const response = await ai.models.generateContent({
+    const response = await callGeminiWithRetry("analyze", () => ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: { parts: [...imageParts, textPart] },
       config: {
@@ -253,7 +299,7 @@ Provide:
           },
         },
       },
-    });
+    }));
 
     const resultText = response.text;
     if (!resultText) {
@@ -264,7 +310,13 @@ Provide:
     res.json({ success: true, analysis: productDetails });
   } catch (error: any) {
     console.error("Gemini analysis error:", error);
-    res.status(500).json({ error: error.message || "Failed to analyze product image with Gemini" });
+    if (isTransientGeminiError(error)) {
+      res.status(503).json({
+        error: "Сервис AI временно перегружен (Gemini высокая нагрузка). Мы уже повторили запрос несколько раз. Подождите 30-60 секунд и попробуйте снова."
+      });
+    } else {
+      res.status(500).json({ error: error.message || "Failed to analyze product image with Gemini" });
+    }
   }
 });
 
@@ -321,16 +373,22 @@ Keep it compact, professional, highlighting product details and material feature
 
     const textPart = { text: instructions };
 
-    const response = await ai.models.generateContent({
+    const response = await callGeminiWithRetry("generate-field", () => ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: { parts: [...imageParts, textPart] }
-    });
+    }));
 
     const textResult = response.text || "";
     res.json({ success: true, text: textResult.trim() });
   } catch (error: any) {
     console.error("Gemini generate-field error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate field content using Gemini" });
+    if (isTransientGeminiError(error)) {
+      res.status(503).json({
+        error: "Сервис AI временно перегружен. Мы уже повторили запрос. Подождите 30-60 секунд и попробуйте снова."
+      });
+    } else {
+      res.status(500).json({ error: error.message || "Failed to generate field content using Gemini" });
+    }
   }
 });
 
