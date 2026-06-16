@@ -25,7 +25,20 @@ import {
   Pencil
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { ProductAnalysis, PrestaShopConfig, PrestaShopCategory, HistoryItem } from "./types";
+import { 
+  ProductAnalysis, 
+  PrestaShopConfig, 
+  PrestaShopCategory, 
+  HistoryItem,
+  UploadedImage,
+  SuggestedVariant,
+  ApiAnalyzeResponse,
+  ApiTestConnectionResponse,
+  ApiCategoriesResponse,
+  ApiPublishResponse,
+  ApiFieldRegenResponse,
+  getErrorMessage,
+} from "./types";
 
 // Stable animation prop constants (avoid re-creating object refs on every render).
 const COLLAPSIBLE_INITIAL = { opacity: 0, height: 0 };
@@ -270,7 +283,7 @@ export function autoSortImagesByColor(images: { id: string; base64: string; mime
   });
 }
 
-export function sortImagesByColorAndOrder(images: { id: string; base64: string; mimeType: string; colorGroup?: string; orderIndex: number; fileName?: string }[]) {
+export function sortImagesByColorAndOrder(images: UploadedImage[]): UploadedImage[] {
   return [...images].sort((a, b) => a.orderIndex - b.orderIndex);
 }
 
@@ -382,7 +395,10 @@ export function isColorMatchFrontend(variantColorName: string, imageColorGroup: 
   return false;
 }
 
-export function getAutoSelectedImageIds(variantName: string, images: { id: string; base64: string; mimeType: string; colorGroup?: string; fileName?: string }[]) {
+export function getAutoSelectedImageIds(
+  variantName: string,
+  images: Pick<UploadedImage, "id" | "colorGroup" | "fileName">[]
+): string[] {
   const parsed = parseVariantStringFrontend(variantName);
   if (!parsed.color) return [];
   return images
@@ -391,9 +407,9 @@ export function getAutoSelectedImageIds(variantName: string, images: { id: strin
 }
 
 export function sortVariantsByImages(
-  variants: { name: string; quantity: number; selectedImageIds?: string[]; isCustomPhotoSelection?: boolean }[],
-  sortedImages: { id: string; base64: string; mimeType: string; colorGroup?: string; fileName?: string }[]
-) {
+  variants: SuggestedVariant[],
+  sortedImages: Pick<UploadedImage, "id" | "colorGroup" | "fileName">[]
+): SuggestedVariant[] {
   return [...variants].map((v, originalIdx) => {
     const parsed = parseVariantStringFrontend(v.name);
     let firstMatchIdx = 999999;
@@ -447,7 +463,7 @@ export default function App() {
   const [configTestResult, setConfigTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // --- UI & Upload/Camera State ---
-  const [uploadedImages, setUploadedImages] = useState<{ id: string; base64: string; mimeType: string; colorGroup?: string; orderIndex: number; fileName?: string }[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null); 
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
   const [imageMime, setImageMime] = useState<string>("image/jpeg");
@@ -514,7 +530,7 @@ export default function App() {
   const [vatRate, setVatRate] = useState<number>(23); // Default standard Polish VAT (23%)
   const [sklad, setSklad] = useState<string>(""); // Apparel fabric composition (e.g. 100% LEN)
   const [modelka, setModelka] = useState<string>(""); // Model specs (e.g. MA 175 CM...)
-  const [suggestedVariants, setSuggestedVariants] = useState<{ name: string; quantity: number; selectedImageIds?: string[]; isCustomPhotoSelection?: boolean }[]>([]); // Extracted product variants
+  const [suggestedVariants, setSuggestedVariants] = useState<SuggestedVariant[]>([]); // Extracted product variants
   const sortedImages = React.useMemo(() => sortImagesByColorAndOrder(uploadedImages), [uploadedImages]);
 
   const currentImagesOrderKey = sortedImages.map(img => img.id).join(",");
@@ -595,14 +611,14 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
       });
-      const data = await response.json();
+      const data: ApiCategoriesResponse = await response.json();
       if (response.ok && data.success) {
         setPsCategories(data.categories || []);
       } else {
         setCategoryLoadError(data.error || "Не удалось загрузить категории.");
       }
-    } catch (err: any) {
-      setCategoryLoadError(err.message || "Ошибка подключения к прокси-серверу.");
+    } catch (err: unknown) {
+      setCategoryLoadError(getErrorMessage(err) || "Ошибка подключения к прокси-серверу.");
     } finally {
       setIsLoadingCategories(false);
     }
@@ -704,7 +720,7 @@ export default function App() {
       if (videoDevices.length > 0 && !selectedCameraId) {
         setSelectedCameraId(videoDevices[0].deviceId);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Camera access failed:", err);
       alert("Не удалось получить доступ к камере. Убедитесь в наличии разрешений.");
       setIsCameraActive(false);
@@ -900,7 +916,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
       });
-      const data = await response.json();
+      const data: ApiTestConnectionResponse = await response.json();
       if (response.ok && data.success) {
         setConfigTestResult({
           success: true,
@@ -913,10 +929,10 @@ export default function App() {
           message: data.error || "Ошибка авторизации. Проверьте правильность URL и веб-сервис ключа."
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setConfigTestResult({
         success: false,
-        message: err.message || "Ошибка соединения с локальным прокси-сервером."
+        message: getErrorMessage(err) || "Ошибка соединения с локальным прокси-сервером."
       });
     } finally {
       setIsTestingConfig(false);
@@ -952,8 +968,8 @@ export default function App() {
         }),
       });
 
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const data: ApiAnalyzeResponse = await response.json();
+      if (response.ok && data.success && data.analysis) {
         const analysis: ProductAnalysis = data.analysis;
         setAnalysisResult(analysis);
         
@@ -1008,8 +1024,8 @@ export default function App() {
       } else {
         setAnalysisError(data.error || "Не удалось проанализировать изображение. Попробуйте еще раз.");
       }
-    } catch (err: any) {
-      setAnalysisError(err.message || "Инфраструктурная ошибка при обращении к AI-модели.");
+    } catch (err: unknown) {
+      setAnalysisError(getErrorMessage(err) || "Инфраструктурная ошибка при обращении к AI-модели.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -1057,8 +1073,8 @@ export default function App() {
         }),
       });
 
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const data: ApiFieldRegenResponse = await response.json();
+      if (response.ok && data.success && data.text) {
         if (fieldName === "title") {
           let text = data.text.trim();
           if (text) {
@@ -1073,8 +1089,8 @@ export default function App() {
       } else {
         alert(data.error || "Не удалось сгенерировать поле. Попробуйте еще раз.");
       }
-    } catch (err: any) {
-      alert(err.message || "Ошибка подключения при генерации поля.");
+    } catch (err: unknown) {
+      alert(getErrorMessage(err) || "Ошибка подключения при генерации поля.");
     } finally {
       setIsGeneratingField(prev => ({ ...prev, [fieldName]: false }));
     }
@@ -1158,7 +1174,7 @@ export default function App() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data: ApiPublishResponse = await response.json();
       if (response.ok && data.success) {
         setSyncStatus({ success: true, productId: data.productId });
         
@@ -1192,8 +1208,8 @@ export default function App() {
         };
         setHistory(prev => [historyItem, ...prev]);
       }
-    } catch (err: any) {
-      setSyncStatus({ error: err.message || "Сетевая ошибка при отправке запроса" });
+    } catch (err: unknown) {
+      setSyncStatus({ error: getErrorMessage(err) || "Сетевая ошибка при отправке запроса" });
     } finally {
       setIsSyncing(false);
     }
@@ -1286,7 +1302,7 @@ export default function App() {
           }
         })
       });
-      const data = await response.json();
+      const data: { success?: boolean; error?: string } = await response.json();
       if (response.ok && data.success) {
         setUpdateStatus({ success: true });
         const updatedHistory = history.map(item => {
@@ -1312,8 +1328,8 @@ export default function App() {
       } else {
         setUpdateStatus({ error: data.error || "Не удалось обновить товар в PrestaShop" });
       }
-    } catch (err: any) {
-      setUpdateStatus({ error: err.message || "Ошибка подключения к PrestaShop" });
+    } catch (err: unknown) {
+      setUpdateStatus({ error: getErrorMessage(err) || "Ошибка подключения к PrestaShop" });
     } finally {
       setIsUpdatingPrestaShop(false);
     }
