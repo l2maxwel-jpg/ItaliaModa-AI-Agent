@@ -1350,15 +1350,25 @@ async function linkImagesToCombination(
 
     let updatedXml = getXml;
 
+    // Match either <images>...</images> OR self-closing <images ... />
+    // (PrestaShop returns the self-closing form when the combination has no images yet).
+    const imagesElementRegex = /<images\b[^>]*\/>|<images\b[^>]*>[\s\S]*?<\/images>/i;
+
     if (updatedXml.includes("<associations>")) {
-      if (updatedXml.match(/<images[^>]*>[\s\S]*?<\/images>/i)) {
-        updatedXml = updatedXml.replace(/<images[^>]*>[\s\S]*?<\/images>/i, associationsImagesXml);
+      if (imagesElementRegex.test(updatedXml)) {
+        updatedXml = updatedXml.replace(imagesElementRegex, associationsImagesXml);
       } else {
         updatedXml = updatedXml.replace(/<associations>/i, `<associations>\n${associationsImagesXml}`);
       }
     } else {
       const associationBlock = `    <associations>\n${associationsImagesXml}\n    </associations>`;
       updatedXml = updatedXml.replace(/<\/combination>/i, `${associationBlock}\n</combination>`);
+    }
+
+    // Sanity check: log a warning if somehow we ended up with multiple <images> blocks.
+    const imageBlockCount = (updatedXml.match(/<images\b/gi) || []).length;
+    if (imageBlockCount > 1) {
+      console.warn(`[Combination Image Linker] WARN: combination ${combinationId} XML has ${imageBlockCount} <images> elements after merge — PrestaShop will pick one and may ignore our IDs.`);
     }
 
     // Strip PrestaShop's read-only attributes (like xlink:href) that cause PUT requests on combinations to fail!
