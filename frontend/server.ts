@@ -18,9 +18,12 @@ const dlog: (...args: any[]) => void = DEBUG_LOG
 // --- Gemini retry wrapper ---
 // Google's generative-language API occasionally returns 503 UNAVAILABLE
 // ("model is currently experiencing high demand") which is transient.
-// We retry with exponential backoff before propagating the error to the client.
-const GEMINI_MAX_ATTEMPTS = 4;
-const GEMINI_BASE_DELAY_MS = 1500;
+// We retry with a SMALL backoff before propagating the error to the client.
+// Budget is intentionally tight (≈3s of waits + 2 calls) so the total request
+// fits comfortably inside the ingress 30s timeout — otherwise the client
+// would receive an HTML gateway-error page instead of our JSON 503.
+const GEMINI_MAX_ATTEMPTS = 2;
+const GEMINI_BASE_DELAY_MS = 1000;
 
 const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));
 

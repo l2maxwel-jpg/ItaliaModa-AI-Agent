@@ -101,3 +101,31 @@ export const getErrorMessage = (err: unknown): string => {
   }
   return "Unknown error";
 };
+
+/**
+ * Safely parse a fetch Response body. If the server returns HTML (gateway
+ * timeout page, 502/503 from ingress, etc.), `response.json()` throws and the
+ * UI shows a cryptic "Unexpected token '<'..." message. This helper falls back
+ * to a friendly error string that includes the HTTP status.
+ */
+export async function safeJson<T extends { error?: string }>(response: Response): Promise<T> {
+  try {
+    return await response.json() as T;
+  } catch {
+    let friendlyError: string;
+    if (response.status === 504 || response.status === 502) {
+      friendlyError = "Сервис превысил время ожидания. Попробуйте через 30-60 секунд.";
+    } else if (response.status === 503) {
+      friendlyError = "Сервис временно недоступен. Подождите и попробуйте снова.";
+    } else if (response.status === 429) {
+      friendlyError = "Слишком много запросов. Подождите минуту и попробуйте снова.";
+    } else if (response.status >= 500) {
+      friendlyError = `Ошибка сервера (HTTP ${response.status}). Попробуйте позже.`;
+    } else if (!response.ok) {
+      friendlyError = `Ответ сервера не в формате JSON (HTTP ${response.status}).`;
+    } else {
+      friendlyError = "Получен неожиданный ответ от сервера (не JSON).";
+    }
+    return { error: friendlyError } as T;
+  }
+}

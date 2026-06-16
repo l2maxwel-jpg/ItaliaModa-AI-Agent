@@ -38,6 +38,7 @@ import {
   ApiPublishResponse,
   ApiFieldRegenResponse,
   getErrorMessage,
+  safeJson,
 } from "./types";
 
 // Stable animation prop constants (avoid re-creating object refs on every render).
@@ -700,7 +701,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
       });
-      const data: ApiCategoriesResponse = await response.json();
+      const data = await safeJson<ApiCategoriesResponse>(response);
       if (response.ok && data.success) {
         setPsCategories(data.categories || []);
       } else {
@@ -1005,7 +1006,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
       });
-      const data: ApiTestConnectionResponse = await response.json();
+      const data = await safeJson<ApiTestConnectionResponse>(response);
       if (response.ok && data.success) {
         setConfigTestResult({
           success: true,
@@ -1057,7 +1058,7 @@ export default function App() {
         }),
       });
 
-      const data: ApiAnalyzeResponse = await response.json();
+      const data = await safeJson<ApiAnalyzeResponse>(response);
       if (response.ok && data.success && data.analysis) {
         const analysis: ProductAnalysis = data.analysis;
         setAnalysisResult(analysis);
@@ -1164,7 +1165,7 @@ export default function App() {
         }),
       });
 
-      const data: ApiFieldRegenResponse = await response.json();
+      const data = await safeJson<ApiFieldRegenResponse>(response);
       if (response.ok && data.success && data.text) {
         if (fieldName === "title") {
           let text = data.text.trim();
@@ -1265,7 +1266,7 @@ export default function App() {
         body: JSON.stringify(payload),
       });
 
-      const data: ApiPublishResponse = await response.json();
+      const data = await safeJson<ApiPublishResponse>(response);
       if (response.ok && data.success) {
         setSyncStatus({ success: true, productId: data.productId });
         
@@ -1438,7 +1439,7 @@ export default function App() {
           }
         })
       });
-      const data: { success?: boolean; error?: string } = await response.json();
+      const data = await safeJson<{ success?: boolean; error?: string }>(response);
       if (response.ok && data.success) {
         setUpdateStatus({ success: true });
         const updatedHistory = history.map(item => {
