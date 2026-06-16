@@ -17,7 +17,7 @@ setGlobalDispatcher(new Agent({
 }));
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // Set maximum upload size limits to handle large images
 app.use(express.json({ limit: "50mb" }));
@@ -2412,7 +2412,7 @@ app.post("/api/prestashop/update-product", async (req, res) => {
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, allowedHosts: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
