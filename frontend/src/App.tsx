@@ -22,9 +22,13 @@ import {
   Layers,
   ChevronDown,
   Info,
-  Pencil
+  Pencil,
+  LogOut
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { apiFetch } from "./auth/apiClient";
+import { useAuth } from "./auth/AuthContext";
+import { UsersAdminPanel } from "./auth/UsersAdminPanel";
 import { 
   ProductAnalysis, 
   PrestaShopConfig, 
@@ -521,6 +525,9 @@ export function sortVariantsByImages(
 }
 
 export default function App() {
+  // --- Auth (current user + logout) ---
+  const { user: authUser, logout: doLogout } = useAuth();
+
   // --- Persistent Connection Config State ---
   const [psConfig, setPsConfig] = useState<PrestaShopConfig>(() => {
     const saved = localStorage.getItem("presta_config");
@@ -696,7 +703,7 @@ export default function App() {
     setIsLoadingCategories(true);
     setCategoryLoadError(null);
     try {
-      const response = await fetch("/api/prestashop/categories", {
+      const response = await apiFetch("/api/prestashop/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
@@ -1001,7 +1008,7 @@ export default function App() {
     setIsTestingConfig(true);
     setConfigTestResult(null);
     try {
-      const response = await fetch("/api/prestashop/test", {
+      const response = await apiFetch("/api/prestashop/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: psConfig }),
@@ -1044,7 +1051,7 @@ export default function App() {
         ? sortedImages.map(img => img.mimeType) 
         : [imageMime];
 
-      const response = await fetch("/api/gemini/analyze", {
+      const response = await apiFetch("/api/gemini/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -1152,7 +1159,7 @@ export default function App() {
       // Note: kept as a two-step lookup; helper would obscure the simple
       // 3-key mapping. If more fields are added later, refactor to a Record.
 
-      const response = await fetch("/api/gemini/generate-field", {
+      const response = await apiFetch("/api/gemini/generate-field", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1260,7 +1267,7 @@ export default function App() {
     };
 
     try {
-      const response = await fetch("/api/prestashop/add-product", {
+      const response = await apiFetch("/api/prestashop/add-product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1420,7 +1427,7 @@ export default function App() {
     setIsUpdatingPrestaShop(true);
     setUpdateStatus(null);
     try {
-      const response = await fetch("/api/prestashop/update-product", {
+      const response = await apiFetch("/api/prestashop/update-product", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -1527,6 +1534,30 @@ export default function App() {
             <span className="font-medium">{psConfig.apiKey ? "Настроен" : "Требуется настройка"}</span>
             <Settings className="w-3.5 h-3.5 ml-1 transition-transform hover:rotate-45" />
           </button>
+
+          {/* Current user + logout */}
+          {authUser && (
+            <div
+              data-testid="auth-user-pill"
+              className="flex items-center gap-2 text-xs pl-3 ml-1 border-l border-[#e1e3e5]"
+            >
+              <div className="flex flex-col items-end leading-tight">
+                <span className="font-semibold text-[#202223]">{authUser.username}</span>
+                <span className={`text-[9px] font-bold ${authUser.role === "admin" ? "text-[#006e52]" : "text-[#5c5f62]"}`}>
+                  {authUser.role === "admin" ? "Администратор" : "Пользователь"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={doLogout}
+                data-testid="logout-btn"
+                title="Выйти"
+                className="p-2 rounded-lg bg-white border border-[#e1e3e5] hover:bg-[#fdf2f2] hover:border-[#fcd6d6] text-[#5c5f62] hover:text-[#b71c1c] transition-all"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -1646,6 +1677,9 @@ export default function App() {
                   <span>{configTestResult.message}</span>
                 </div>
               )}
+
+              {/* Admin-only: users management panel */}
+              {authUser?.role === "admin" && <UsersAdminPanel />}
             </div>
           </motion.div>
         )}

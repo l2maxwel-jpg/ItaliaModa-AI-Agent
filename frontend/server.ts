@@ -1,12 +1,15 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 
 dotenv.config();
 
 import { setGlobalDispatcher, Agent } from "undici";
+import { createAuthRouter } from "./auth/routes.js";
+import { requireAuth } from "./auth/middleware.js";
 
 // Dev-only debug logger — silenced in production to keep logs clean.
 // Replaces noisy debug logging without losing console.error / .warn.
@@ -78,6 +81,22 @@ const PORT = Number(process.env.PORT) || 3000;
 // Set maximum upload size limits to handle large images
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(cookieParser());
+
+// Mount auth routes BEFORE the requireAuth gate below.
+// These endpoints (setup, login, needs-setup, etc.) must be reachable
+// without a session token.
+app.use("/api/auth", createAuthRouter());
+
+// Gate every remaining /api/* endpoint behind JWT authentication.
+// The gate is scoped to "/api" so the React app on "/" stays publicly served.
+app.use("/api", (req, res, next) => {
+  // Pass through auth router's already-handled prefix
+  if (req.path.startsWith("/auth/")) return next();
+  // Public health check
+  if (req.path === "/health") return next();
+  return requireAuth(req, res, next);
+});
 
 // Initialize Gemini SDK with User-Agent telemetry headers as requested
 const ai = new GoogleGenAI({

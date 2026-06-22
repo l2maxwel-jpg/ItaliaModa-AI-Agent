@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "77630a8b-fb1e-4b91-9ba3-a2b80c59455e",
+      "username": "Maxwel",
+      "passwordHash": "$2b$12$ePpoUIUO.Bcw1FQAwiHK1urAzEeyNgGVS4dS4pxpFwSYBQb1JRIiW",
+      "role": "admin",
+      "isActive": true,
+      "createdAt": "2026-06-19T10:55:02.813Z",
+      "failedLoginAttempts": 0
+    }
+  ]
+}
